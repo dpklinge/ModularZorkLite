@@ -1,0 +1,240 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="/ZorkClone/CSS/global.css">
+<title>ZorkClone</title>
+<script>
+	function overwrite(){
+		if(document.getElementById("overwrite").innerHTML == "overwrite"){
+			document.getElementById("overwriteCheckBox").checked = true;
+		}
+	}
+	function loadBehaviours(){
+		var behaviours = document.getElementById("behaviours").innerHTML;
+		if(behaviours.includes("PASSIVE")){
+			document.getElementById("passive").selected=true;
+		}
+		if(behaviours.includes("NEUTRAL")){
+			document.getElementById("neutral").selected=true;
+		}
+		if(behaviours.includes("AGGRESSIVE")){
+			document.getElementById("aggressive").selected=true;
+		}
+		if(behaviours.includes("FOLLOW")){
+			document.getElementById("follow").selected=true;
+		}
+		
+	}
+	function loadDeadState(){
+		var isDead = document.getElementById("isDead").innerHTML;
+		if(isDead == true){
+			document.getElementById("yesDead").selected=true;
+		}else{
+			document.getElementById("noDead").selected=true;
+		}
+	}
+</script>
+</head>
+<body onload="overwrite(); loadBehaviours(); loadDeadState();" class="gameMode">
+	<div class="header">
+		<div class="mainTitle">
+			<a class="headerLink" href="/ZorkClone/"><h1
+					th:text="'ModularZorkLite
+					('+${session.user.username}+')'"></h1></a>
+		</div>
+		<div class="rightHeader" id="navbarSupportedContent">
+
+			<a class="nav-link" href="/ZorkClone/logout"><button
+					class="formButton shakeHover" type="submit">Logout</button></a> <a
+				class="nav-link" href="/ZorkClone/userHome"><button
+					class="formButton shakeHover" type="submit">Homepage</button></a>
+
+		</div>
+	</div>
+	<div class="register-form">
+		<h3>Create actor</h3>
+		<p th:text="${error}"></p>
+		<form th:object="${actor}" method="POST" th:action="@{/createActor}">
+		<input type="checkbox" id="overwriteCheckBox" name="overwrite" value="overwrite"> Overwrite if actor already exists?<br>
+			<div class="form-row">
+				<div class="centered">
+					<label>Identification name</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{name}" type="text" name="name"
+						class="form-control" placeholder="Identification name"
+						required="required" />
+				</div>
+				<div class="centered">
+					<label>Display name</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{displayName}" type="text" name="displayName"
+						class="form-control" placeholder="Display Name"
+						required="required" />
+				</div>
+				<div class="centered">
+					<label>Aliases, comma delineated</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea name="aliases" class="form-control"
+						placeholder="Aliases" required="required" th:inline="text">[[${aliases}]]</textarea>
+				</div>
+				<div class="centered">
+					<label>Room display text</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{displayText}" name="displayText"
+						class="form-control displayText"
+						placeholder="Actor's in room display text" required="required" ></textarea>
+				</div>
+				<div class="centered">
+					<label>Behaviours</label>
+				</div>
+				<div class="centered">
+					<select name="behaviour" multiple required>
+						<option id="passive" value="passive">Passive</option>
+						<option id="aggressive" value="aggressive">Aggressive</option>
+						<option id="neutral" value="neutral">Neutral</option>
+						<option id="follow" value="follow">Follow</option>
+					</select>
+				</div>
+				<div class="centered">
+					<label>Examine text</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{examine}" name="examine"
+						class="form-control" placeholder="Actor's examine text"
+						required="required" ></textarea>
+				</div>
+				<div class="centered">
+					<label>Starting Health </label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{health}" type="text" name="health"
+						class="form-control" placeholder="Starting health" required />
+				</div>
+				<div class="centered">
+					<label>Max Health </label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{maxHealth}" type="text" name="maxHealth"
+						class="form-control" placeholder="Max health" required />
+				</div>
+				<div class="centered">
+					<label>Items by item id, comma delineated</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea  name="items" class="form-control"
+						placeholder="Items" th:inline="text">[[${items}]]</textarea>
+				</div>
+				<div class="centered">
+					<label>Starts dead?</label>
+				</div>
+				<div class="centered">
+					<select name="isDead" required>
+						<option id="noDead" value="false">false</option>
+						<option id="yesDead" value="true">true</option>	
+					</select>
+				</div>
+				<div class="centered">
+					<label>Dead examine text</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{deadExamineText}" 
+						name="deadExamineText" class="form-control"
+						placeholder="Actor's dead examine text" required="required"></textarea>
+				</div>
+				<div class="centered">
+					<label>Dead display text</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{deadDisplayText}" 
+						name="deadDisplayText" class="form-control"
+						placeholder="Actor's dead display text" required="required" ></textarea>
+				</div>
+				<div class="centered">
+					<label>Damage</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{damage}" type="text" name="damage"
+						class="form-control" placeholder="Actor's damage"
+						required="required" />
+				</div>
+				<div class="centered">
+					<label>Damage reduction</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{damageReduction}" type="text"
+						name="damageReduction" class="form-control"
+						placeholder="Actor's damage reduction" required="required" />
+				</div>
+				<div class="centered">
+					<label>Accuracy</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{accuracy}" type="text" name="accuracy"
+						class="form-control" placeholder="Actor's accuracy"
+						required="required" />
+				</div>
+				<div class="centered">
+					<label>Accuracy reduction</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{accuracyReduction}" type="text"
+						name="accuracyReduction" class="form-control"
+						placeholder="Actor's accuracy reduction" required="required" />
+				</div>
+				<div class="centered">
+					<label>Speed</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{speed}" type="text" name="speed"
+						class="form-control" placeholder="Actor's speed"
+						required="required" />
+				</div>
+				<div class="centered">
+					<label>Message when killed</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{killText}" name="killText"
+						class="form-control" placeholder="Message displayed when killed"
+						required="required" ></textarea>
+				</div>
+				<div class="centered">
+					<label>Effects by id, comma delineated</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea name="effects" class="form-control"
+						placeholder="Effects" th:inline="text">[[${effects}]]</textarea>
+				</div>
+
+			</div>
+			<div class="form-group-login">
+				<button name="submitButton" type="submit" class="formButton shakeHover"
+					value="createCharacter">Create</button>
+				<button name="submitButton" type="submit" class="formButton shakeHover"
+					value="deleteCharacter">Delete</button>
+			</div>
+		</form>
+	</div>
+
+<p id="overwrite" class="hidden" th:text="${overwrite}"></p>
+<p id="behaviours" class="hidden" th:text="${behaviours}"> </p>
+<p id="isDead" class="hidden" th:text="${isDead}"> </p>
+
+</body>
+
+<footer>
+	<div class="header">
+		<div class="row footer-row">
+			<div class="col-6 copyright">
+				<p>All the world's a stage, and you may as well fill it with slimes.</p>
+			</div>
+		</div>
+	</div>
+</footer>
+</html>

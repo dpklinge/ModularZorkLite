@@ -1,0 +1,1 @@
+{"name":"InnacurateClub","displayName":"club of innacuracy","aliases":["club","cudgel"],"examine":"This club is very likely to miss. Why would you even use this?","visible":true,"groundText":"On the ground there is a highly innacurate club. What garbage.","type":"WEAPON","quantity":1,"slot":"RIGHTHAND","effects":[],"damage":5,"accuracy":20,"isHoldable":true,"isEquipable":true}

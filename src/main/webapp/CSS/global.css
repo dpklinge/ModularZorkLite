@@ -1,0 +1,517 @@
+.spinIn{
+    -webkit-animation: mymove 3s ease 0s 1 reverse forwards; /* Safari 4.0 - 8.0 */
+    animation: mymove 3s ease 0s 1 reverse forwards;
+}
+/* Safari 4.0 - 8.0 */
+@-webkit-keyframes mymove {
+    from {top: 0px;
+    	opacity:1;
+    	transform: rotate(0deg);}
+    to {top: 1000px;
+    font-size:10em;
+    	opacity:0;
+    	transform: rotate(360deg);}
+}
+
+
+@keyframes mymove {
+    from {margin-top: 0%;
+    	opacity:1;
+    	transform: rotate(0deg);}
+    to {margin-top: 1000px;
+    	font-size:10em;
+    	opacity:0;
+    	transform: rotate(360deg);}
+}
+
+.shakeHover:hover{
+	-webkit-animation: shakeHover .3s linear 0s infinite normal forwards; /* Safari 4.0 - 8.0 */
+    animation: shakeHover .3s linear 0s infinite normal forwards;
+}
+@-webkit-keyframes shakeHover {
+       25% {
+    transform: rotate(.5deg);
+  }
+  
+  75% {
+    transform: rotate(-.5deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+
+
+}
+
+
+@keyframes shakeHover {
+   25% {
+    transform: rotate(.5deg);
+  }
+  
+  75% {
+    transform: rotate(-.5deg);
+  }
+
+  100% {
+    transform: rotate(0deg);
+  }
+    
+}
+.shake{
+	-webkit-animation: shake .4s ease 3s 1 normal forwards; /* Safari 4.0 - 8.0 */
+    animation: shake .4s ease 3s 1 normal forwards;
+}
+
+@-webkit-keyframes shake {
+     10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+@keyframes shake {
+    10%, 90% {
+    transform: translate3d(-1px, 0, 0);
+  }
+  
+  20%, 80% {
+    transform: translate3d(2px, 0, 0);
+  }
+
+  30%, 50%, 70% {
+    transform: translate3d(-4px, 0, 0);
+  }
+
+  40%, 60% {
+    transform: translate3d(4px, 0, 0);
+  }
+}
+
+
+body.gameMode {
+	min-height:90%;
+	color: rgb(235, 215, 195);
+	background-color: black;
+}
+
+.centralDiv {
+	width: 320px; border-width : 5px;
+	border-color: rgb(235, 215, 195);
+	border-style: ridge;
+	border-radius: 5px;
+	border-width: 5px;
+}
+
+div.roomDisplay {
+	word-wrap: break-word;
+	overflow-y: scroll;
+	position: fixed;
+	top: 0;
+	width: 100%;
+	max-height: 86%;
+}
+
+div.output {
+	word-wrap: break-word;
+	position: fixed;
+	top: 50%;
+	overflow-y: scroll;
+	height: 44%;
+	width: 55%;
+	position: fixed;
+	border-width: 5px;
+	borde-color: rgb(235, 215, 195);
+	border-style: ridge;
+}
+
+div.chatBox {
+	word-wrap: break-word;
+	position: fixed;
+	top: 50%;
+	overflow-y: scroll;
+	height: 44%;
+	width: 45%;
+	position: fixed;
+	right: 0;
+	border-width: 5px;
+	borde-color: rgb(235, 215, 195);
+	border-style: ridge;
+}
+
+div.outputBoxes {
+	display: flex;
+	width: 100%;
+}
+
+div.input {
+	margin: 0;
+	width: 100%;
+	position: fixed;
+	bottom: 0;
+}
+
+
+button.commandButton {
+	width: 15%;
+}
+
+input.commandInput[type=text] {
+	background-color: black;
+	color: rgb(235, 215, 195);
+	width: 80%;
+}
+
+input.commandInput:invalid {
+	background-color: black;
+	color: rgb(235, 215, 195);
+	width: 80%;
+}
+input:-webkit-autofill, textarea:-webkit-autofill, select:-webkit-autofill {
+    background-color: white !important;
+	-webkit-box-shadow: 0 0 0 30px white inset;
+    color: black !important;
+}
+
+.noScrolls {
+	overflow: hidden;
+}
+
+a {
+	transition: color 1.5s, text-shadow 1.5s;
+}
+
+a:link, a:visited, a:active {
+	text-decoration: none;
+	color: rgb(235, 215, 195);
+}
+
+a:hover {
+	color: rgb(255, 255, 235);
+	text-shadow: 0px 0px 8px rgb(235, 215, 195);
+	transition: color .5s, text-shadow 0.5s;
+}
+
+h3 {
+	text-align: center;
+	font-size: 3em;
+	padding-bottom: 5px;
+}
+textarea{
+	font-family: Arial;
+	font-size: 1.2em;
+}
+input[type=text], input[type=password],input[type=email], textarea {
+	font-size: 1.2em;
+	width: 100%;
+	padding: 5px 10px;
+	margin: 8px 0;
+	display: inline-block;
+	border: 2px solid rgb(125, 105, 85);
+	border-radius: 5px;
+	box-sizing: border-box;
+}
+
+* {
+	box-sizing: border-box;
+	margin: 0;
+}
+
+.background {
+	background-color: black;
+	color: rgb(235, 215, 195);
+}
+
+.btn {
+	padding: 0.25rem 1.0rem;
+	border-radius: .5rem;
+}
+
+.formButton {
+	font-size: 1.5em;
+	height: 35px;
+	color: black;
+	background-color: rgb(235, 215, 195);
+	border-color: #E8E8E8;
+	border-radius: 12px;
+	margin: 5px;
+	width: 97%;
+	text-align: center;
+	margin: 10px;
+	transition: background-color 1.5s, color 1.5s, box-shadow 1.5s;
+}
+
+.formButton:hover {
+	background-color: rgb(255, 255, 235);
+	color:rgb(193,100,0);
+	box-shadow: 0px 0px 20px 3px rgb(245, 235, 225);
+	transition: background-color .8s, color .8s, box-shadow .5s;
+}
+
+
+.btn:hover {
+	background-color: #00aeef;
+}
+
+.ipDisplay{
+	position:fixed;
+	top:0;
+	right:20px;
+}
+
+.header {
+	display: flex;
+	background-color: black;
+	color: rgb(235, 215, 195);
+	border-color: rgb(235, 215, 195);
+	border-style: ridge none ridge none;
+	border-width: 5px 0px 5px 0;
+}
+
+.navbar {
+	background-color: #A82C21;
+}
+
+.navbar-brand {
+	font-family: 'Abril Fatface', cursive;
+	font-size: 34px;
+	transition-property: font-size;
+	transition-timing-function: ease-in;
+}
+
+.navbar-brand:hover {
+	font-size: 38px;
+}
+
+.navbar-brand, .nav-link {
+	color: white;
+}
+
+.nav-right {
+	width: 230px;
+}
+
+.mainHeaderLeft {
+	width: 25%;
+	border-width: 0 5px 0px 0px;
+	border-style: solid;
+}
+
+.mainTitle, .headerLink:link, .headerLink:visited {
+	margin: auto;
+	font-family: 'Abril Fatface', cursive;
+}
+
+.rightHeader {
+	border-color: rgb(235, 215, 195);
+	border-style: none none none ridge;
+	border-width: 0px 0px 0px 5px;
+	display: flex;
+	flex-direction: column;
+	margin-left: auto;
+	width: 25%;
+	margin: 0 15px 0 0;
+}
+
+.user-hello {
+	margin-top: 75px;
+}
+/* This is the end of the Navigation Bar*/
+
+/* This is the start of the Form*/
+.register-form {
+	max-width: 320px;
+	margin: 150px auto;
+}
+
+.login-form {
+	margin: 250px auto;
+}
+
+form {
+	border: grey solid 1px;
+	border-radius: 20px;
+	margin-bottom: 20px;
+	background-color: rgb(195, 175, 155);
+}
+
+form.override {
+	border-width:0px;
+	color: rgb(235, 215, 195);
+	margin-bottom: 20px;
+	background-color: black;
+}
+
+.validate-form {
+	display: none;
+}
+
+.mb-2, .form-group {
+	margin: 20px;
+}
+
+.form-group {
+	width: 100%
+}
+
+.form-group-login {
+	padding: 10px;
+	width: 100%
+}
+
+.form-group-links {
+	padding: 20px;
+	margin-left: 70px;
+}
+
+.security-question {
+	height: 40px;
+}
+
+input:invalid {
+	background-color: rbg(175, 155, 135);
+	color: grey;
+}
+
+input:valid {
+	
+}
+
+.incorrect {
+	margin: 0 auto;
+	background-color: red;
+	color: white;
+}
+
+.form-check>button {
+	margin-right: 18px;
+}
+
+.terms {
+	color: #00aeef !important;
+}
+
+.btn-sign-in {
+	float: right;
+}
+/* This is the end of the Form*/
+
+/* This is the start of the Form*/
+.registration {
+	margin: auto;
+	text-align: center;
+	background-color: rgb(240, 240, 255);
+	max-width: 50%;
+	width: 50%;
+	*
+}
+
+.update {
+	margin: auto;
+	text-align: center;
+	background-color: rgb(240, 240, 255);
+	max-width: 50%;
+	width: 50%;
+}
+
+form {
+	border: grey solid 1px;
+	border-radius: 20px;
+	margin-bottom: 100px;
+}
+
+.inputField {
+	margin: 0px;
+	padding: 5px;
+}
+
+.accountDiv {
+	background-color: rgb(255, 255, 204);
+}
+
+input[type=checkbox], input[type=radio] {
+	box-sizing: border-box;
+	padding: 0;
+	margin-top: 0px;
+	margin-left: 50px;
+}
+
+.update span {
+	color: #339900;
+	font-weight: bold;
+}
+
+.hiddenText, .hidden {
+	display: none;
+}
+
+.errorText {color =red;
+	
+}
+
+/* This is the end of the Form*/
+
+/* This is the Start UserHome*/
+.table {
+	width: 80%;
+	margin: 100px auto;
+}
+
+#table-row {
+	background-color: lightyellow;
+}
+/* This is the End of UserHome */
+
+/* This is where the Footer Starts*/
+footer {
+	margin-top: 50px;
+	border-top: black solid 1px;
+	bottom: 0;
+	width: 100%;
+}
+
+.footer-row {
+	width: 100%
+}
+
+.copyright {
+	padding: 15px;
+}
+
+.copyright p {
+	float: right;
+}
+label{
+	text-align:center;
+	color:black;
+}
+.centered{
+	display:flex;
+	justify-content:center;
+}
+
+@media screen and (max-device-width : 380px)
+{
+  body
+  {
+    font:12px;
+  }
+}
+@media screen and (max-device-width : 1204px)
+{
+  body
+  {
+    font:16px;
+  }

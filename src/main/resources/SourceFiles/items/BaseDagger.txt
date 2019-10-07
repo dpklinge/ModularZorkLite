@@ -1,0 +1,1 @@
+{"name":"BaseDagger","displayName":"rusty dagger","aliases":["dagger","knife"],"examine":"This dagger is short, blunt, and tinged with rust. It's better than nothing, though.","visible":true,"groundText":"A small, rusty iron dagger is lying on the ground.","type":"WEAPON","quantity":1,"slot":"RIGHTHAND","effects":[],"damage":2,"accuracy":100,"isHoldable":true,"isEquipable":true}

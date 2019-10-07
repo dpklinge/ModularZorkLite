@@ -1,0 +1,70 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<link rel="stylesheet" href="/ZorkClone/CSS/global.css">
+<script type="text/javascript"
+	src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+
+</head>
+<body  class="gameMode">
+	<div class="roomDisplay" id="mainDisplay">
+		<h1>WELCOME TO <a href="/ZorkClone/">THE GAME</a>, <h1 th:text="${ session.player.name }"></h1></h1>
+		<p id="result" th:text="${ roomDisplay }"></p>
+	</div>
+
+	<div class="input">
+		<form action="javascript:wsSendMessage()" method="POST" autocomplete="off" class="override"> 
+			<input type="text" name="command" class="commandInput" id="inputText"
+				required autofocus />
+			<button type="submit" class="commandButton formButton" value="Submit">Enter</button>
+		</form>
+	</div>
+	<p id="ipAddress" class="ipDisplay" th:text="${ application.ipAddress }"></p>
+	
+	
+<script type="text/javascript">
+		var ipAddress = '[[${ application.ipAddress }]]';
+		var webSocket = new WebSocket("ws://"+ipAddress+":8088/ZorkClone/webSocketEndpoint");
+		var echoText = "";
+		webSocket.onopen = function(message){ wsOpen(message);};
+		webSocket.onmessage = function(message){ wsGetMessage(message);};
+		webSocket.onclose = function(message){ wsClose(message);};
+		webSocket.onerror = function(message){ wsError(message);};
+		
+		function wsOpen(message){
+			echoText += "Connected! \n";
+		}
+		function wsSendMessage(){
+			var message= document.getElementById("inputText").value;
+			webSocket.send(message);
+			document.getElementById("result").innerHTML=echoText;
+			document.getElementById("inputText").value = "";
+			if(message.toUpperCase() === "QUIT"||message.toUpperCase() === "Q"){
+				window.location.href = "/ZorkClone/userHome/";
+			}
+		}
+		
+		function wsCloseConnection(){
+			webSocket.close();
+		}
+		function wsGetMessage(message){
+			echoText += message.data;
+			document.getElementById("result").innerHTML=echoText;
+			var objDiv = document.getElementById("mainDisplay");
+			objDiv.scrollTop = objDiv.scrollHeight;
+		}
+		function wsClose(message){
+			echoText += "Disconnect ... \n";
+			document.getElementById("result").innerHTML=echoText;
+		}
+
+		function wsError(message){
+			echoText += "Error ... \n";
+			document.getElementById("result").innerHTML=echoText;
+		}
+	</script>
+</body>
+</html>

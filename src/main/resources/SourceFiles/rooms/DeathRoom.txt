@@ -1,0 +1,1 @@
+{"name":"DeathRoom","displayName":"Room where you die","directions":["WEST"],"mapping":{"WEST":"EastRoom"},"description":"WHY ARE YOU READING. WHY ARE YOU HERE. YOU GONNA DIE.","actorsPresent":["Death"],"itemsPresent":[]}

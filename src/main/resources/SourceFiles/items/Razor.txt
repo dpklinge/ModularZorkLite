@@ -1,0 +1,1 @@
+{"name":"Razor","displayName":"Razor Sword","aliases":["sword","razor","razor sword"],"examine":"A wickedly sharp blade, equally good for slaying foes and shaving.","visible":true,"groundText":"A gleaming, sharp sword is lying here.","type":"WEAPON","quantity":1,"slot":"TWOHANDS","effects":[],"damage":10,"accuracy":90,"isHoldable":true,"isEquipable":true}

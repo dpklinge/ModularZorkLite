@@ -1,0 +1,1 @@
+{"name":"CombatRoom","displayName":"The War Room","directions":["EAST"],"mapping":{"EAST":"StartRoom"},"description":"FIGHT FIGHT FIGHT FIGHT FIGHT FIGHT FIGHT FIGHT","actorsPresent":["BattleDummy"],"itemsPresent":[]}

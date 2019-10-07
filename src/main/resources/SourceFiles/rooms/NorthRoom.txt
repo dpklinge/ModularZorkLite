@@ -1,0 +1,1 @@
+{"name":"NorthRoom","displayName":"The northern room","directions":["SOUTH"],"mapping":{"SOUTH":"StartRoom"},"description":"A room to the north. How quaint.","actorsPresent":["SuperDummy"],"itemsPresent":["InnacurateClub"]}

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="/ZorkClone/CSS/global.css">
+<title>Zork Clone</title>
+</head>
+
+<body class="gameMode">
+	<div class="header">
+		<div class="mainTitle">
+			<a class="headerLink" href="/ZorkClone/" tabindex="-1"><h1>ModularZorkLite</h1></a>
+		</div>
+		<div class="rightHeader"
+			id="navbarSupportedContent">
+			<a class="nav-link"
+					href="/ZorkClone/login" tabindex="-1"><button class="formButton shakeHover"
+							type="submit">Login</button></a>
+
+		</div>
+	</div>
+
+	<div class="register-form">
+		<h3>Register</h3>
+		<form th:object="${user}" method="POST" th:action="@{/register}">
+
+			<div class="form-row">
+				<div class="input-group mb-2">
+					<input th:field="*{firstName}" type="text" name="FirstName"
+						class="form-control first-name" placeholder="First name" required="required"/>
+				</div>
+				<p class="incorrect" id="missingFirstName" th:text="${firstNameError}"></p>
+				<div class="input-group mb-2">
+					<input th:field="*{lastName}" type="text" name="LastName"
+						class="form-control last-name" placeholder="Last name" required="required"/>
+				</div>
+				<p class="incorrect" align="center" id="missingLastName" th:text="${lastNameError}"></p>
+				<div class="input-group mb-2">
+					<input th:field="*{email}" type="email" name="Email"
+						class="form-control email" placeholder="Email" required="required"/>
+				</div>
+				<p class="incorrect" align="center" id="nonValidEmail" th:text="${emailError}"></p>
+				<div class="input-group mb-2">
+					<input th:field="*{username}" type="text" name="UserName"
+						class="form-control username" placeholder="Create a username" required="required"/>
+				</div>
+				<p class="incorrect" align="center" id="nonValidUsername" th:text="${usernameError}"></p>
+				<div class="input-group mb-2">
+					<input th:field="*{password}" type="password" name="Password"
+						class="form-control create-password"
+						placeholder="Create password" required="required"/>
+				</div>
+				<p class="incorrect" align="center" id="nonValidPassword" th:text="${passwordError}"></p>
+				<div class="input-group mb-2">
+					<input type="password" name="PasswordConfirm"
+						class="form-control confirm-password"
+						placeholder="Confirm password" required />
+				</div>
+				<div class="form-group-login">
+					<button type="submit" 
+						class="formButton shakeHover" value="Register">Register</button>
+				</div>
+			</div>
+		</form>
+
+	</div>
+</body>
+<footer>
+	<div class="header">
+		<div class="row footer-row">
+			<div class="col-6 copyright">
+				Ey bruv, make a user, wouldya!
+			</div>
+		</div>
+	</div>
+</footer>
+</html>

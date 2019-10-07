@@ -1,0 +1,1 @@
+{"name":"UnderworldLobby","displayName":"The Lobby of the Underworld","playersPresent":[],"directions":[],"mapping":{},"description":"You've really gone and done it this time haven't you? Welcome to the underworld, numbnuts. It takes a special kind of stupid to get here in a game where you respawn on dying.","actorsPresent":[],"itemsPresent":[]}

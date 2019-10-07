@@ -1,0 +1,1 @@
+{"name":"DummyFluff","displayName":"dummy fluff","aliases":["FLUFF","STUFFING","INNARDS","COTTON","CORPSE"],"examine":"This fluff was brutally extracted from the inside of a test dummy through excessive violence.","visible":true,"groundText":"Bits of fluff from a dead test dummy are strewn around the environs.","type":"HOLDABLE","quantity":3,"isHoldable":true,"isEquipable":false}

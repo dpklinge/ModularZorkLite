@@ -1,0 +1,1 @@
+{"name":"testroom","displayName":"The Portal Tester","playersPresent":[],"directions":["NORTH","EAST","SOUTH","WEST","DOWN","UP"],"mapping":{"NORTH":"StartRoom","EAST":"StartRoom","SOUTH":"StartRoom","WEST":"StartRoom","DOWN":"StartRoom","UP":"SecretBossRoom"},"description":"This room is weird. All the exits go to weird places. Yuck.","actorsPresent":[],"itemsPresent":[]}

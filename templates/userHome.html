@@ -1,0 +1,74 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="/ZorkClone/CSS/global.css">
+<title>ZorkClone</title>
+
+</head>
+<body onload="checkCharacter()" class="gameMode">
+	<div class="header">
+		<div class="mainTitle">
+			<a class="headerLink" href="/ZorkClone/"><h1 th:text="'ModularZorkLite
+					('+${session.user.username}+')'"></h1></a>
+		</div>
+		<div class="rightHeader" id="navbarSupportedContent">
+		
+			<a class="nav-link" href="/ZorkClone/logout" tabindex="-1"><button
+			class="formButton shakeHover" type="submit">Logout</button></a> 
+			
+			<a class="nav-link" href="/ZorkClone/createCharacter" tabindex="-1"><button
+			class="formButton shakeHover" type="submit">Create Char</button></a>
+
+		</div>
+	</div>
+	<div class="register-form">
+		<h3 id="charDisplay" >Character name: </h3>
+		<h3 id="charName" th:text="${ session.player?.name }"></h3>
+		<a id="noCharDisplay" href="/ZorkClone/createCharacter"><h3 id="noCharDisplay">Hey buddy, you should make a character!</h3></a>
+	</div>
+	<div id="playButton" class="register-form">
+		<div class="form-group-login">
+			<a href="/ZorkClone/play">
+				<button type="submit" class="formButton shakeHover" value="Login">Play</button>
+			</a>
+		</div>
+	</div>
+	<div id="playButton" class="register-form">
+			<a class="nav-link" href="/ZorkClone/editor"><button
+			class="formButton shakeHover" type="submit">Edit Game</button></a>
+	</div>
+
+
+<script>
+function checkCharacter(){
+	var charName = document.getElementById("charName").innerHTML;
+	var noCharElement=document.getElementById("noCharDisplay");
+	var charElement=document.getElementById("charDisplay");
+	var play =document.getElementById("playButton");
+	if(charName==null||charName==""){
+		noCharElement.style.display="inline";
+		charElement.style.display="none";
+		play.style.display="none";
+	}else{
+		noCharElement.style.display="none";
+		charElement.style.display="inline";
+		play.style.display="block";
+	}
+}
+</script>
+
+</body>
+
+<footer>
+	<div class="header">
+		<div class="row footer-row">
+			<div class="col-6 copyright">
+				<p>Thanks for being here, buddy!</p>
+			</div>
+		</div>
+	</div>
+</footer>
+</html>

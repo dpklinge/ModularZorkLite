@@ -1,0 +1,1 @@
+{"name":"EastRoom","displayName":"The eastern room","directions":["WEST","EAST"],"mapping":{"WEST":"StartRoom","EAST":"DeathRoom"},"description":"This room is painted floor to ceiling with thick, viscous blood. You don't know what happened here. You don't want to.","actorsPresent":[],"itemsPresent":["Razor"]}

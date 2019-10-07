@@ -1,0 +1,1 @@
+{"name":"SouthRoom","displayName":"The southern room","directions":["NORTH"],"mapping":{"NORTH":"StartRoom"},"description":"Another creatively nomenclatured room. This one's in the south.","actorsPresent":["Stalker"],"itemsPresent":["PlateArmor"]}

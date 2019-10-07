@@ -1,0 +1,1 @@
+{"name":"RugStartRoom","displayName":"rug","aliases":["RUG","CARPET"],"examine":"This thick rug brings a warmth and comfort to an otherwise stark and unforgiving room.","visible":false,"groundText":" ","type":"FLAVOR","isHoldable":false,"isEquipable":false}

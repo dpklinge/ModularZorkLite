@@ -1,0 +1,210 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="/ZorkClone/CSS/global.css">
+<title>ZorkClone</title>
+<script>
+	function overwrite() {
+		if (document.getElementById("overwrite").innerHTML == "overwrite") {
+			document.getElementById("overwriteCheckBox").checked = true;
+		}
+	}
+	function load(){
+		var visibility = document.getElementById("visibility").innerHTML;
+		document.getElementById("visible").selected=visibility;
+		document.getElementById("notVisible").selected=!visibility;
+		var slot = document.getElementById("slot").innerHTML;
+		document.getElementById(""+slot).selected=true;
+		var type = document.getElementById("type").innerHTML;
+		document.getElementById(""+type).selected=true;
+
+	}
+</script>
+
+</head>
+<body onload="overwrite(); load();" class="gameMode">
+	<div class="header">
+		<div class="mainTitle">
+			<a class="headerLink" href="/ZorkClone/"><h1
+					th:text="'ModularZorkLite
+					('+${session.user.username}+')'"></h1></a>
+		</div>
+		<div class="rightHeader" id="navbarSupportedContent">
+
+			<a class="nav-link" href="/ZorkClone/logout"><button
+					class="formButton shakeHover" type="submit">Logout</button></a> <a
+				class="nav-link" href="/ZorkClone/userHome"><button
+					class="formButton shakeHover" type="submit">Homepage</button></a>
+
+		</div>
+	</div>
+	<div class="register-form">
+		<h3>Create item</h3>
+		<p th:text="${error}"></p>
+		<form th:object="${item}" method="POST" th:action="@{/createItem}">
+			<input type="checkbox" id="overwriteCheckBox" name="overwrite"
+				value="overwrite"> Overwrite if item already exists?<br>
+			<div class="form-row">
+				<div class="centered">
+					<label>Identification name</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{name}" type="text" name="name"
+						class="form-control" placeholder="Identification name" required />
+				</div>
+				<div class="centered">
+					<label>Display name</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{displayName}" type="text" name="displayName"
+						class="form-control" placeholder="Display Name" required />
+				</div>
+				<div class="centered">
+					<label>Examine</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{examine}" name="examine"
+						class="form-control" placeholder="Examine text" required></textarea>
+				</div>
+				<div class="centered">
+					<label>Aliases, comma delineated</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea name="aliases" class="form-control"
+						placeholder="Aliases" th:inline="text">[[${aliases}]]</textarea>
+				</div>
+				<div class="centered">
+					<label>Ground display text</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea th:field="*{groundText}" name="groundText"
+						class="form-control"
+						placeholder="Item's display text when on ground"
+						required="required"></textarea>
+				</div>
+				<div class="centered">
+					<label>Effect names, comma delineated</label>
+				</div>
+				<div class="input-group mb-2">
+					<textarea name="effects" class="form-control"
+						placeholder="Effects" th:inline="text">[[${effects}]]</textarea>
+				</div>
+				<div class="centered">
+					<label>Starts visible?</label>
+				</div>
+				<div class="centered">
+					<select name="isVisible" required>
+						<option id="visible" value="true">true</option>
+						<option id="notVisible" value="false">false</option>
+					</select>
+				</div>
+				<div class="centered">
+					<label>Item Type</label>
+				</div>
+				<div class="centered">
+					<select name="typeOptions" required>
+						<option id="flavor" value="flavor">Flavor(description only)</option>
+						<option id="static" value="static">Static(interactable, not holdable)</option>
+						<option id="holdable" value="holdable">Holdable</option>
+						<option id="equipable" value="equipable">Equipable</option>
+						<option id="armor" value="armor">Armor</option>
+						<option id="weapon" value="weapon">Weapon</option>
+						<option id="consumable" value="consumable">Consumable</option>
+						<option id="ammunition" value="ammunition">Ammunition</option>
+					</select>
+				</div>
+				<div class="centered">
+					<label>Damage reduction (flat)</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{damageReduction}" type="text"
+						name="damageReduction" class="form-control"
+						placeholder="Damage reduction" />
+				</div>
+				<div class="centered">
+					<label>Accuracy reduction</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{accuracyReduction}" type="text"
+						name="accuracyReduction" class="form-control"
+						placeholder="Accuracy reduction" />
+				</div>
+				<div class="centered">
+					<label>Item bulk</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{bulk}" type="text" name="bulk"
+						class="form-control" placeholder="Item bulk" />
+				</div>
+				<div class="centered">
+					<label>Item equip slot</label>
+				</div>
+				<div class="centered">
+					<select name="slotOptions" >
+						<option id="head" value="head">Head</option>
+						<option id="brow" value="brow">brow</option>
+						<option id="chest" value="chest">chest</option>
+						<option id="arm" value="arm">arm</option>
+						<option id="glove" value="glove">glove</option>
+						<option id="leg" value="leg">leg</option>
+						<option id="belt" value="belt">belt</option>
+						<option id="ring" value="ring">ring</option>
+						<option id="foot" value="foot">foot</option>
+						<option id="cloak" value="cloak">cloak</option>
+						<option id="necklace" value="necklace">necklace</option>
+						<option id="lefthand" value="lefthand">left hand</option>
+						<option id="righthand" value="righthand">right hand</option>
+						<option id="twohands" value="twohands">two hands</option>
+					</select>
+				</div>
+				<div class="centered">
+					<label>Item quantity</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{quantity}" type="text" name="quantity"
+						class="form-control" placeholder="Item quantity" />
+				</div>
+				<div class="centered">
+					<label>Damage</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{damage}" type="text" name="damage"
+						class="form-control" placeholder="Item damage" />
+				</div>
+				<div class="centered">
+					<label>Accuracy</label>
+				</div>
+				<div class="input-group mb-2">
+					<input th:field="*{accuracy}" type="text" name="accuracy"
+						class="form-control" placeholder="Item accuracy" />
+				</div>
+
+
+				<div class="form-group-login">
+				<button name="submitButton" type="submit" class="formButton shakeHover"
+					value="createItem">Create</button>
+				<button name="submitButton" type="submit" class="formButton shakeHover"
+					value="deleteItem">Delete</button>
+			</div>
+			</div>
+		</form>
+	</div>
+	<p id="overwrite" class="hidden" th:text="${overwrite}"></p>
+<p id="visibility" class="hidden" th:text="${visibility}"> </p>
+<p id="slot" class="hidden" th:text="${slot}"> </p>
+<p id="type" class="hidden" th:text="${type}"> </p>
+</body>
+
+<footer>
+	<div class="header">
+		<div class="row footer-row">
+			<div class="col-6 copyright">
+				<p>Need more options? Too bad!</p>
+			</div>
+		</div>
+	</div>
+</footer>
+</html>

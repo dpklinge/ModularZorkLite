@@ -1,0 +1,1 @@
+{"name":"EasterEgg","displayName":"easter egg","aliases":["egg","easter"],"examine":"This hidden easter egg is very evoke-ative....","visible":false,"groundText":"Whoa! A rare fabled easter egg!","type":"HOLDABLE","effects":["EasterEggEffect"],"quantity":1,"isHoldable":true,"isEquipable":false}

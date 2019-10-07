@@ -1,0 +1,1 @@
+{"name":"StartRoomRock","displayName":"rock","aliases":["ROCK","PEBBLE","STONE"],"examine":"A plain and unassuming rock.","visible":true,"groundText":"A testing rock is lying on the ground here.","type":"WEAPON","quantity":1,"slot":"LEFTHAND","effects":[],"damage":1,"accuracy":100,"isHoldable":true,"isEquipable":true}

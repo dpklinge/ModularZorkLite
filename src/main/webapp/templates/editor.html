@@ -1,0 +1,63 @@
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<link rel="stylesheet" href="/ZorkClone/CSS/global.css">
+<title>ZorkClone</title>
+
+</head>
+<body class="gameMode">
+	<div class="header">
+		<div class="mainTitle">
+			<a class="headerLink" href="/ZorkClone/"><h1 th:text="'ModularZorkLite
+					('+${session.user.username}+')'"></h1></a>
+		</div>
+		<div class="rightHeader" id="navbarSupportedContent">
+		
+			<a class="nav-link" href="/ZorkClone/logout"><button
+			class="formButton shakeHover" type="submit">Logout</button></a> 
+			
+			<a class="nav-link" href="/ZorkClone/userHome"><button
+			class="formButton shakeHover" type="submit">Homepage</button></a>
+
+		</div>
+	</div>
+	<div class="register-form">
+		<h3 id="charDisplay" >Welcome to the editor! </h3>
+		<p th:text="${result}"></p>
+		<p th:text="${error}"></p>
+	
+	</div>
+	<div class="register-form">
+		<div class="form-group-login">
+			<a class="nav-link" href="/ZorkClone/createRoom"><button
+			class="formButton shakeHover" type="submit">Create Room</button></a>
+			<a class="nav-link" href="/ZorkClone/editRoom"><button
+			class="formButton shakeHover" type="submit">Edit Room</button></a>
+			<a class="nav-link" href="/ZorkClone/createItem"><button
+			class="formButton shakeHover" type="submit">Create Item</button></a>
+			<a class="nav-link" href="/ZorkClone/editItem"><button
+			class="formButton shakeHover" type="submit">Edit Item</button></a>
+			<a class="nav-link" href="/ZorkClone/createActor"><button
+			class="formButton shakeHover" type="submit">Create Actor</button></a>
+			<a class="nav-link" href="/ZorkClone/editActor"><button
+			class="formButton shakeHover" type="submit">Edit Actor</button></a>
+		</div>
+	</div>
+
+
+
+</body>
+
+<footer>
+	<div class="header">
+		<div class="row footer-row">
+			<div class="col-6 copyright">
+				<p>Skanth rof engib reeh, dubdy!</p>
+			</div>
+		</div>
+	</div>
+</footer>
+</html>

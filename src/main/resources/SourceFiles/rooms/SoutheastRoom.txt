@@ -1,0 +1,1 @@
+{"name":"SoutheastRoom","displayName":"The Neutral Room","directions":["NORTHWEST"],"mapping":{"NORTHWEST":"StartRoom"},"description":"This room exists to house actors with the neutral behaviour.","actorsPresent":["GenericMan","Follower"],"itemsPresent":[]}
