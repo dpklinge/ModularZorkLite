@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.fdmgroup.zorkclone.actors.Actor;
@@ -22,6 +23,8 @@ import com.fdmgroup.zorkclone.rooms.Room;
 import com.fdmgroup.zorkclone.rooms.io.RoomReader;
 @Component
 public class ZorkController {
+	@Autowired
+	private CommandProcessor processor;
 	public void loadRooms() {
 		System.out.println("Loading rooms");
 		Path path = Paths.get(Main.baseGamePath+"/rooms/");
@@ -64,11 +67,9 @@ public class ZorkController {
 					reader.readItem(FilenameUtils.removeExtension(child.getName()));
 				} catch (IOException x) {
 					System.err.println("Problem creating file - check document paths");
-					System.err.println(x);
+					x.printStackTrace();
 				}
 			}
-		} else {
-
 		}
 	}
 
@@ -103,9 +104,7 @@ public class ZorkController {
 		while (loopContinue) {
 
 			commands = input.getCommand();
-
-			CommandProcessor processor = new CommandProcessor(player);
-			player=processor.processCommand(commands);
+			player=processor.processCommand(commands, player);
 		}
 	}
 

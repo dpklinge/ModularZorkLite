@@ -1,16 +1,17 @@
 package com.fdmgroup.zorkclone.webcontrollers;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
 
+import com.fdmgroup.zorkclone.combat.CombatChecker;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-
+import jakarta.servlet.http.HttpSession;
 import com.fdmgroup.zorkclone.Main;
 import com.fdmgroup.zorkclone.player.Player;
 import com.fdmgroup.zorkclone.player.io.PlayerReader;
@@ -18,6 +19,8 @@ import com.fdmgroup.zorkclone.user.User;
 
 @Controller
 public class GameplayController {
+	@Autowired
+	private CombatChecker checker;
 	
 
 	@GetMapping("/play*")
@@ -32,6 +35,7 @@ public class GameplayController {
 		PlayerReader playerReader = Main.getPlayerReader();
 		player = playerReader.getPlayer(player.getUser().getUsername(),player.getName());
 		playerReader.writePlayer(player);
+		checker.enterRoom(player, player.getCurrentRoom());
 		session.setAttribute("player", player);
 
 		return "play";

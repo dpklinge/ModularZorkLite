@@ -2,9 +2,9 @@ package com.fdmgroup.zorkclone.webcontrollers;
 
 import java.util.Objects;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -29,7 +29,7 @@ public class RegistrationController {
 	}
 
 	@PostMapping("/register")
-	public String userRegistrationSubmit(@ModelAttribute User user, HttpServletRequest request ,HttpSession session) {
+	public String userRegistrationSubmit(@ModelAttribute User user, HttpServletRequest request , HttpSession session) {
 		Validator validator = new Validator();
 		
 		String[] errorString = validator.validateUserRegistration(user, request.getParameter("PasswordConfirm"));

@@ -8,7 +8,8 @@ public class InMemoryPlayerReader implements PlayerReader {
 	private static HashMap<String, Player> players = new HashMap<>();
 	
 	@Override
-	public Player getPlayer(String username, String charName) {
+	public Player getPlayer(String username, String name) {
+		String charName = name.toLowerCase();
 		if(players.containsKey(charName)){
 			System.out.println("Found player: "+players.get(charName));
 			return players.get(charName);
@@ -23,12 +24,12 @@ public class InMemoryPlayerReader implements PlayerReader {
 
 	@Override
 	public synchronized void writePlayer(Player player) {
-		players.replace(player.getName(), player);
-		
+		players.replace(player.getName().toLowerCase(), player);
 	}
 
 	@Override
-	public Player readPlayerByName(String characterName) {
+	public Player readPlayerByName(String character) {
+		String characterName = character.toLowerCase();
 		if(players.containsKey(characterName)){
 			System.out.println("Found player: "+players.get(characterName));
 			return players.get(characterName);

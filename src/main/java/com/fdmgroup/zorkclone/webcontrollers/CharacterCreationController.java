@@ -4,9 +4,8 @@ import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpSession;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.ui.ModelMap;
@@ -22,24 +21,25 @@ import com.fdmgroup.zorkclone.rooms.io.RoomReader;
 import com.fdmgroup.zorkclone.user.JsonUserReader;
 import com.fdmgroup.zorkclone.user.User;
 import com.fdmgroup.zorkclone.user.UserReader;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class CharacterCreationController {
 	@GetMapping("/createCharacter")
-	public String characterCreation(Model model, HttpSession session, HttpServletRequest request) {
+	public String characterCreation(Model model, HttpSession session) {
 		if(session.getAttribute("user")==null){
 			return "redirect:index";
 		}
-		request.setAttribute("loginError", "");
+		model.addAttribute("loginError", "");
 
 		return "createCharacter";
 	}
 
 	@PostMapping("/createCharacter")
-	public String characterCreationSubmit(HttpServletRequest request ,HttpSession session,ModelMap model) {
+	public String characterCreationSubmit(@RequestParam("CharacterName") String characterName, @RequestParam("Description") String description, HttpSession session, ModelMap model) {
 		Player player = new Player();
-		player.setName(request.getParameter("CharacterName"));
-		player.setDescription(request.getParameter("Description"));
+		player.setName(characterName);
+		player.setDescription(description);
 		User user = (User) session.getAttribute("user");
 		player.setUser(user);
 		user.setCharacterName(player.getName());
@@ -68,7 +68,6 @@ public class CharacterCreationController {
 			}
 		} else {
 			System.out.println("CHARACTER NAME ALREADY EXISTS");
-			request.setAttribute("characterError", player.getName()+" has already been taken!");
 			model.addAttribute("characterError", player.getName()+" has already been taken!");
 			return "createCharacter";
 		}

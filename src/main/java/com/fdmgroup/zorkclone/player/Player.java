@@ -10,6 +10,7 @@ import java.util.Set;
 import com.fdmgroup.zorkclone.Main;
 import com.fdmgroup.zorkclone.combat.CombatChecker;
 import com.fdmgroup.zorkclone.combat.Fightable;
+import com.fdmgroup.zorkclone.commands.ListFetchUtil;
 import com.fdmgroup.zorkclone.items.Item;
 import com.fdmgroup.zorkclone.items.Slot;
 import com.fdmgroup.zorkclone.player.io.PlayerReader;
@@ -161,7 +162,7 @@ public class Player implements Fightable {
 	}
 
 	public Room getCurrentRoom() {
-		return currentRoom;
+		return Main.getRoomReader().readRoom(currentRoom.getName());
 	}
 
 	public void setCurrentRoom(Room currentRoom) {
@@ -247,9 +248,6 @@ public class Player implements Fightable {
 	}
 
 	public String die() {
-		if (Main.isWeb) {
-			return dieWeb();
-		}
 		// setDead(true);
 		PlayerReader playerReader = Main.getPlayerReader();
 		playerReader.writePlayer(this);
@@ -316,7 +314,7 @@ public class Player implements Fightable {
 		return inventory;
 	}
 
-	public String dieWeb() {
+	public String dieWeb(Output output, CombatChecker checker) {
 		setIsDead(true);
 		health = maxHealth;
 
@@ -340,17 +338,17 @@ public class Player implements Fightable {
 		}
 		slotsEquipped = new HashMap<>();
 		dropped = dropped.substring(0, dropped.length() - 1);
-		Output.outputToTarget(this, dropped);
-		Output.outputToTarget(this, "You are magically whisked back to the starting room!");
-		Output.outputToTargetRoom(this, roomReader.readRoom(Main.startRoom),
+		output.outputToTarget(this, dropped);
+		output.outputToTarget(this, "You are magically whisked back to the starting room!");
+		output.outputToTargetRoom(this, roomReader.readRoom(Main.startRoom),
 				"The heavens open up, and " + getDisplayName() + " descends, returned again to this mortal coil!");
-		Output.outputToRoom(this, dropped);
-		CombatChecker.leaveRoom(this, roomReader.readRoom(Main.startRoom), null);
+		output.outputToRoom(this, dropped);
+		checker.leaveRoom(this, roomReader.readRoom(Main.startRoom), null);
 
-		CombatChecker.enterRoom(this, roomReader.readRoom(Main.startRoom));
+		checker.enterRoom(this, roomReader.readRoom(Main.startRoom));
 		currentRoom = roomReader.readRoom(Main.startRoom);
 
-		Output.outputToTarget(this, currentRoom.displayRoomWeb(this));
+		output.outputToTarget(this, currentRoom.displayRoomWeb(this, output));
 		PlayerReader playerReader = Main.getPlayerReader();
 		setIsDead(false);
 		playerReader.writePlayer(this);

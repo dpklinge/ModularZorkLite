@@ -2,10 +2,12 @@ package com.fdmgroup.zorkclone.webcontrollers;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.servlet.http.HttpServletRequest;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,7 +23,6 @@ import com.fdmgroup.zorkclone.actors.io.ActorReader;
 import com.fdmgroup.zorkclone.actors.io.InMemoryActorReader;
 import com.fdmgroup.zorkclone.actors.io.JsonActorReader;
 import com.fdmgroup.zorkclone.effects.Effect;
-import com.fdmgroup.zorkclone.effects.effectio.EffectReader;
 import com.fdmgroup.zorkclone.items.Item;
 import com.fdmgroup.zorkclone.items.ItemType;
 import com.fdmgroup.zorkclone.items.Slot;
@@ -36,6 +37,8 @@ import com.fdmgroup.zorkclone.rooms.io.RoomReader;
 
 @Controller
 public class EditorController {
+	@Autowired
+	private List<Effect> effects;
 
 	@GetMapping("/editor")
 	public String editorMain(HttpServletRequest request) {
@@ -205,10 +208,9 @@ public class EditorController {
 		}
 		
 		item.setEffects(new ArrayList<>());
-		EffectReader effectReader = Main.getEffectReader();
 		if (!request.getParameter("effects").isEmpty()) {
 			for (String effectName : request.getParameter("effects").split(",")) {
-				Effect effect = effectReader.readEffect(effectName);
+				Effect effect = effects.stream().filter(it -> it.getEffectName().equalsIgnoreCase(effectName)).findFirst().orElseThrow(() -> {return new RuntimeException("Unlisted effect "+ effectName+" attempted!");});
 				if (effect == null) {
 					error = true;
 					errorMessage += "Effect '" + effectName + "' not found.<br>";
@@ -304,10 +306,9 @@ public class EditorController {
 			}
 		}
 		actor.setEffects(new ArrayList<>());
-		EffectReader effectReader = Main.getEffectReader();
 		if (!request.getParameter("effects").isEmpty()) {
 			for (String effectName : request.getParameter("effects").split(",")) {
-				Effect effect = effectReader.readEffect(effectName);
+				Effect effect = effects.stream().filter(it -> it.getEffectName().equalsIgnoreCase(effectName)).findFirst().orElseThrow(() -> {return new RuntimeException("Unlisted effect "+ effectName+" attempted!");});
 				if (effect == null) {
 					error = true;
 					errorMessage += "Effect '" + effectName + "' not found.<br>";

@@ -120,9 +120,9 @@ public class Room {
 
 	}
 
-	public String displayRoom(Player player) {
+	public String displayRoom(Player player, Output output) {
 		if(Main.isWeb){
-			return displayRoomWeb(player);
+			return displayRoomWeb(player, output);
 		}
 		String roomText = displayName + "\n" + description + "\n";
 
@@ -148,14 +148,14 @@ public class Room {
 			RoomReader roomReader = Main.getRoomReader(Main.savedGamePath);
 			for (Direction direction : directions) {
 
-				roomText = roomText + Output.capitalize(Direction.getEnumString(direction)) + " - ";
+				roomText = roomText + output.capitalize(Direction.getEnumString(direction)) + " - ";
 			
 				roomText = roomText + 	roomReader.readRoom(mapping.get(direction)).displayName + "\n";
 			}
 		}
 		return roomText;
 	}
-	public String displayRoomWeb(Player player) {
+	public String displayRoomWeb(Player player, Output output) {
 		String roomText = displayName + "<br />&emsp;" + description + "<br />";
 
 		if (actorsPresent.size() > 0) {
@@ -191,7 +191,7 @@ public class Room {
 			RoomReader roomReader = Main.getRoomReader(Main.savedGamePath);
 			for (Direction direction : directions) {
 
-				roomText = roomText + Output.capitalize(Direction.getEnumString(direction)) + " - ";
+				roomText = roomText + output.capitalize(Direction.getEnumString(direction)) + " - ";
 			
 				roomText = roomText + 	roomReader.readRoom(mapping.get(direction)).displayName + "<br />";
 			}

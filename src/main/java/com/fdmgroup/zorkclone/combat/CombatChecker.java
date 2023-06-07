@@ -13,19 +13,29 @@ import com.fdmgroup.zorkclone.rooms.Direction;
 import com.fdmgroup.zorkclone.rooms.Room;
 import com.fdmgroup.zorkclone.rooms.io.RoomReader;
 import com.fdmgroup.zorkclone.weboutput.Output;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+import javax.swing.*;
+
+@Service
 public class CombatChecker {
-	public static List<Actor> aggressors = new ArrayList<>();
-	public static HashMap<Actor, CombatTimer> timers = new HashMap<>();
-	private static ActorReader reader = Main.getActorReader(Main.savedGamePath);
-	private static RoomReader roomReader = Main.getRoomReader(Main.savedGamePath);
+	@Autowired
+	private Output output;
+	public CombatChecker(Output output){
+		this.output = output;
+	}
+	public List<Actor> aggressors = new ArrayList<>();
+	public HashMap<Actor, CombatTimer> timers = new HashMap<>();
+	private ActorReader reader = Main.getActorReader(Main.savedGamePath);
+	private RoomReader roomReader = Main.getRoomReader(Main.savedGamePath);
 
-	public static boolean leaveRoom(Player player, Room newRoom, Direction direction) {
+	public boolean leaveRoom(Player player, Room newRoom, Direction direction) {
 		List<Actor> removeList = new ArrayList<>();
 		player.setCurrentRoom(roomReader.readRoom(player.getCurrentRoom().getName()));
 		Room oldRoom = player.getCurrentRoom();
 		if (direction != null) {
-			Output.outputToRoom(player,
+			output.outputToRoom(player,
 					player.getDisplayName() + " leaves the room heading " + Direction.getEnumString(direction) + ".");
 		}
 		player.getCurrentRoom().getPlayersPresent().remove(player.getName());
@@ -42,11 +52,11 @@ public class CombatChecker {
 				player.getCurrentRoom().getActorsPresent().remove(actor.getName());
 				newRoom.getActorsPresent().add(actor.getName());
 				if (Main.isWeb) {
-					Output.outputToTarget(player, Output.capitalize(Output.needsAThe(actor.getDisplayName())
+					output.outputToTarget(player, output.capitalize(output.needsAThe(actor.getDisplayName())
 							+ actor.getDisplayName() + " follows you into the next room!"));
-					Output.outputToRoom(player,Output.capitalize(Output.needsAThe(actor.getDisplayName()) + actor.getDisplayName()
+					output.outputToRoom(player,output.capitalize(output.needsAThe(actor.getDisplayName()) + actor.getDisplayName()
 							+ " follows " + player.getDisplayName() + " out of the room!"));
-					Output.outputToTargetRoom(player,newRoom, Output.capitalize(Output.needsAThe(actor.getDisplayName())
+					output.outputToTargetRoom(player,newRoom, output.capitalize(output.needsAThe(actor.getDisplayName())
 							+ actor.getDisplayName() + " follows " + player.getDisplayName() + " into the room!"));
 				}
 				String followText = actor.getDisplayName() + " follows you into the next room!";
@@ -63,18 +73,18 @@ public class CombatChecker {
 		return true;
 	}
 
-	private static void checkOtherPlayers(Player player, Actor actor, Room oldRoom) {
+	private void checkOtherPlayers(Player player, Actor actor, Room oldRoom) {
 		//TODO transfer aggression
 	}
 
-	public static void enterRoom(Player player, Room newRoom) {
+	public void enterRoom(Player player, Room newRoom) {
 		System.out.println("Entering room(1).");
 		System.out.println("Entering room(2). Player: "+player.getDisplayName());
 		System.out.println("Entering room(3). Room: "+newRoom.getDisplayName());
 		newRoom=roomReader.readRoom(newRoom.getName());
 		if (!player.getIsDead()) {
 			String otherOutput = player.getName() + " enters the room!";
-			Output.outputToTargetRoom(player,newRoom,otherOutput);
+			output.outputToTargetRoom(player,newRoom,otherOutput);
 		}
 		newRoom.getPlayersPresent().add(player.getName());
 		
@@ -84,7 +94,7 @@ public class CombatChecker {
 			Actor thisActor = reader.readActor(actor);
 			if (thisActor.getBehaviours().contains(Behaviour.AGGRESSIVE) && (!aggressors.contains(thisActor))
 					&& !thisActor.getIsDead()) {
-				CombatTimer timer = new CombatTimer(thisActor, player);
+				CombatTimer timer = new CombatTimer(thisActor, player, output, this);
 				timer.startAttackThread(thisActor);
 				timers.put(thisActor, timer);
 				aggressors.add(thisActor);
@@ -93,13 +103,13 @@ public class CombatChecker {
 
 	}
 
-	public static boolean canLeaveRoom(Room currentRoom, Direction direction) {
+	public boolean canLeaveRoom(Room currentRoom, Direction direction) {
 
 		return true;
 	}
 
-	public static void addAggressor(Actor actor, Player player) {
-		CombatTimer timer = new CombatTimer(actor, player);
+	public void addAggressor(Actor actor, Player player) {
+		CombatTimer timer = new CombatTimer(actor, player, output, this);
 		timer.startAttackThread(actor);
 		timers.put(actor, timer);
 		aggressors.add(actor);

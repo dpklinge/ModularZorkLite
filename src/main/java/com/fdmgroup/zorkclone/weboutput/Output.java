@@ -4,76 +4,70 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fdmgroup.zorkclone.Main;
-import com.fdmgroup.zorkclone.commands.GetLists;
+import com.fdmgroup.zorkclone.commands.ListFetchUtil;
 import com.fdmgroup.zorkclone.player.Player;
 import com.fdmgroup.zorkclone.player.io.PlayerReader;
 import com.fdmgroup.zorkclone.rooms.Room;
-import com.fdmgroup.zorkclone.webcontrollers.websockets.OutputEndpoint;
+import com.fdmgroup.zorkclone.webcontrollers.websockets.WebsocketOutput;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class Output {
-	public static void outputToTarget(Player player, String string) {
+	@Autowired
+	private WebsocketOutput output;
+	@Autowired
+	private ListFetchUtil listUtil;
+	public void outputToTarget(Player player, String string) {
 		System.out.println("Message to target:");
 		System.out.println(string);
 		System.out.println("Target name: "+player.getDisplayName());
 		if (Main.isWeb) {
-			OutputEndpoint.broadcastSingle(OutputEndpoint.users.get(player.getUser()), "<br/>" + string);
+			output.broadcastSpecific(string, player.getUser().getUsername());
 		}
 		System.out.println("Finished outputToTarget");
 		
 
 	}
 
-	public static void outputToRoomExceptTarget(Player player, Player fightable, String outputOther) {
+	public void outputToRoomExceptTarget(Player player, Player fightable, String outputOther) {
 		if (Main.isWeb) {
-			GetLists getLists = new GetLists();
-			List<Player> playerList = getLists.getListPlayers(player);
-			for (Player playerTarget : playerList) {
-				if (!fightable.getName().equalsIgnoreCase(playerTarget.getName())) {
-					outputToTarget(playerTarget, outputOther);
-				}
-
-			}
+			List<String> usernames = listUtil.getListPlayers(player).stream().map(it -> it.getUser().getUsername()).filter(it -> !it.equalsIgnoreCase(player.getUser().getUsername())&&!it.equalsIgnoreCase(fightable.getUser().getUsername())).toList();
+			output.broadcastSpecific(outputOther, usernames);
 		}
 
 	}
 
-	public static void outputToRoom(Player player, String string) {
+	public void outputToRoom(Player player, String string) {
 		if (Main.isWeb) {
-			GetLists getLists = new GetLists();
-			List<Player> playerList = getLists.getListPlayers(player);
-			for (Player playerTarget : playerList) {
-				outputToTarget(playerTarget, string);
-			}
+			List<String> usernames = listUtil.getListPlayers(player).stream().map(it -> it.getUser().getUsername()).toList();
+			output.broadcastSpecific(string, usernames);
 		}
 
 	}
 
-	public static void outputToTargetRoom(Player player, Room room, String string) {
+	public void outputToTargetRoom(Player player, Room room, String string) {
+		if (Main.isWeb) {
 		System.out.println("Outputting to room.");
 		System.out.println("Room: "+room.getDisplayName());
 		System.out.println("Message: "+string);
 		System.out.println("Player: "+player.getName());
-		List<Player> playerList = new ArrayList<>();
+		List<String> usernames = new ArrayList<>();
 		PlayerReader reader = Main.getPlayerReader();
 		for (String playerName : room.getPlayersPresent()) {
-
 			if (!playerName.equalsIgnoreCase(player.getName())) {
-
-				playerList.add(reader.readPlayerByName(playerName));
+				usernames.add(reader.readPlayerByName(playerName).getUser().getUsername());
 			}
 		}
-		System.out.println("List of players: "+playerList);
-		if (Main.isWeb) {
-			for (Player playerTarget : playerList) {
-				Output.outputToTarget(playerTarget, string);
-			}
+		System.out.println("List of users: "+usernames);
+		output.broadcastSpecific(string, usernames);
 		}
 	}
 
-	public static void outputToAll(Player player, String string) {
+	public void outputToAll(Player player, String string) {
 		string = capitalize(string);
 		if (Main.isWeb) {
-			OutputEndpoint.broadcast(string);
+			output.broadcastAll(string);
 		}
 		System.out.println(string);
 

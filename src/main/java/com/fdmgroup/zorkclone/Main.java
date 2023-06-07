@@ -4,6 +4,7 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import com.fdmgroup.zorkclone.weboutput.Output;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,8 +12,6 @@ import com.fdmgroup.zorkclone.actors.io.ActorReader;
 import com.fdmgroup.zorkclone.actors.io.InMemoryActorReader;
 import com.fdmgroup.zorkclone.actors.io.JsonActorReader;
 import com.fdmgroup.zorkclone.combat.CombatChecker;
-import com.fdmgroup.zorkclone.effects.effectio.EffectClassReader;
-import com.fdmgroup.zorkclone.effects.effectio.EffectReader;
 import com.fdmgroup.zorkclone.input.UserInput;
 import com.fdmgroup.zorkclone.items.io.InMemoryItemReader;
 import com.fdmgroup.zorkclone.items.io.ItemReader;
@@ -35,6 +34,11 @@ public class Main {
 	public static Path savedGamePath ;
 	public static Path userPath ;
 	public static String startRoom = "StartRoom";
+	private static PlayerReader playerReader;
+	private static RoomReader roomReader;
+	private static ItemReader itemReader;
+	private static ActorReader actorReader;
+
 	
 	//Initializing filepaths
 	static{
@@ -63,46 +67,55 @@ public class Main {
 		System.out.println("Targeted user file path: "+userPath.toString());
 		
 	}
+	public static RoomReader getRoomReader(){ return getRoomReader(Main.baseGamePath); }
 	public static RoomReader getRoomReader(Path path) {
-		if (isWeb) {
-			return new InMemoryRoomReader();
-		} else {
-			return new JsonRoomReader(path);
+		if(roomReader == null) {
+			if (isWeb) {
+				roomReader = new InMemoryRoomReader();
+			} else {
+				roomReader = new JsonRoomReader(path);
+			}
 		}
-
+		return roomReader;
 	}
 
+	public static ActorReader getActorReader(){ return getActorReader(Main.baseGamePath); }
 	public static ActorReader getActorReader(Path path) {
-		if (isWeb) {
-			return new InMemoryActorReader();
-		} else {
-			return new JsonActorReader(path);
+		if(actorReader == null) {
+			if (isWeb) {
+				actorReader = new InMemoryActorReader();
+			} else {
+				actorReader = new JsonActorReader(path);
+			}
 		}
-
+		return actorReader;
 	}
 
+	public static ItemReader getItemReader(){ return getItemReader(Main.baseGamePath); }
 	public static ItemReader getItemReader(Path path) {
-		if (isWeb) {
-			return new InMemoryItemReader();
-		} else {
-			return new JsonItemReader(path);
+		if(itemReader == null) {
+			if (isWeb) {
+				itemReader = new InMemoryItemReader();
+			} else {
+				itemReader = new JsonItemReader(path);
+			}
 		}
+		return itemReader;
 	}
 
 	public static PlayerReader getPlayerReader() {
-		if (isWeb) {
-			return new InMemoryPlayerReader();
-		} else {
-			return new JsonPlayerReader();
+		if(playerReader == null) {
+			if (isWeb) {
+				playerReader = new InMemoryPlayerReader();
+			} else {
+				playerReader = new JsonPlayerReader();
+			}
 		}
+		return playerReader;
 	}
 
 	public static UserReader getUserReader() {
 		return new JsonUserReader();
-	}
-
-	public static EffectReader getEffectReader() {
-		return new EffectClassReader();
 	}
 
 	public static void main(String[] args) {
@@ -123,19 +136,21 @@ public class Main {
 		UserInput input = new UserInput();
 		String menuResult = input.askNewGame(player);
 		Room room = null;
+		Output output = new Output();
+		CombatChecker checker = new CombatChecker(output);
 
 		if (menuResult.equals("NEWGAME")) {
 			player = controller.newGame();
 			RoomReader reader = getRoomReader(Main.baseGamePath);
 			room = reader.readRoom(startRoom);
-			CombatChecker.enterRoom(player, room);
-			System.out.println(room.displayRoom(player));
+			checker.enterRoom(player, room);
+			System.out.println(room.displayRoom(player, output));
 			controller.startGame(room, player);
 		} else if (menuResult.equals("CONTINUE")) {
 			RoomReader reader = getRoomReader(Main.savedGamePath);
 			room = reader.readRoom(player.getCurrentRoom().getName());
-			CombatChecker.enterRoom(player, room);
-			System.out.println(room.displayRoom(player));
+			checker.enterRoom(player, room);
+			System.out.println(room.displayRoom(player, output));
 			controller.startGame(room, player);
 		} else if (menuResult.equals("CREATORMODE")) {
 			controller.createMode();

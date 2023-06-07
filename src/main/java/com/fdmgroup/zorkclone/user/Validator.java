@@ -1,11 +1,8 @@
 package com.fdmgroup.zorkclone.user;
 
-
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-
 import com.fdmgroup.zorkclone.Main;
 import com.fdmgroup.zorkclone.player.Player;
+import org.apache.commons.validator.routines.EmailValidator;
 
 public class Validator {
 
@@ -118,16 +115,7 @@ public class Validator {
 	}
 
 	public boolean emailValidator(String email) {
-		try {
-			InternetAddress emailAddress = new InternetAddress(email);
-			emailAddress.validate();
-			System.out.println("Email valid: "+email);
-			return true;
-		} catch (AddressException e) {
-			System.out.println("Email invalid: "+email);
-			return false;
-		}
-		
+		return EmailValidator.getInstance().isValid(email);
 	}
 
 	public String[] validateCharacter(Player character) {

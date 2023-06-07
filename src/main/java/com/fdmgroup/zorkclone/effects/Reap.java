@@ -4,14 +4,21 @@ import com.fdmgroup.zorkclone.Main;
 import com.fdmgroup.zorkclone.combat.Combat;
 import com.fdmgroup.zorkclone.combat.Fightable;
 import com.fdmgroup.zorkclone.commands.CommandProcessor;
-import com.fdmgroup.zorkclone.commands.GetLists;
+import com.fdmgroup.zorkclone.commands.ListFetchUtil;
 import com.fdmgroup.zorkclone.items.Item;
 import com.fdmgroup.zorkclone.items.io.ItemReader;
 import com.fdmgroup.zorkclone.player.Player;
 import com.fdmgroup.zorkclone.rooms.io.RoomReader;
 import com.fdmgroup.zorkclone.weboutput.Output;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class Reap extends Effect{
+	@Autowired
+	private Output output;
+	@Autowired
+	private Combat combat;
 
 	public Reap() {
 		super();
@@ -24,14 +31,14 @@ public class Reap extends Effect{
 		
 		
 		if(commands.length<2){
-			Output.outputToTarget(player,"Reap WHAT, exactly?");
+			output.outputToTarget(player,"Reap WHAT, exactly?");
 			cp.updatePlayer(player);
 			return player;
 		}
 		if(commands[1].toLowerCase().equals("me")){
-			Output.outputToTarget(player,"If that's how you wanna do this, who am I to stop you?");
-			Output.outputToTarget(player,"You reap yourself, and are immediately sent to the underworld.");
-			Output.outputToRoom(player,player.getDisplayName()+" reaps themself with death's scythe, and vanishes in a puff of hellfire!");
+			output.outputToTarget(player,"If that's how you wanna do this, who am I to stop you?");
+			output.outputToTarget(player,"You reap yourself, and are immediately sent to the underworld.");
+			output.outputToRoom(player,player.getDisplayName()+" reaps themself with death's scythe, and vanishes in a puff of hellfire!");
 			RoomReader roomReader= Main.getRoomReader(Main.savedGamePath);
 			player.setCurrentRoom(roomReader.readRoom("UnderworldLobby"));
 			cp.updatePlayer(player);
@@ -40,21 +47,19 @@ public class Reap extends Effect{
 		
 		ItemReader itemReader =Main.getItemReader(Main.savedGamePath);
 		
-		for(Fightable fightable :(new GetLists()).listFightables(player)){
+		for(Fightable fightable :(new ListFetchUtil()).listFightables(player)){
 			if(fightable.getAliases().stream().anyMatch(commands[1]::equalsIgnoreCase)){
 				fightable.setHealth(0);
 				fightable.setIsDead(true);
-				Output.outputToTarget(player,"Using the power of death's scythe, you instantly destroy the target!");
+				output.outputToTarget(player,"Using the power of death's scythe, you instantly destroy the target!");
 				if(fightable instanceof Player){
-					Output.outputToTarget((Player)fightable, player.getDisplayName() + " reaps you with the power of death's scythe!");
-					Output.outputToRoomExceptTarget(player,(Player)fightable,  player.getDisplayName() + " reaps "+fightable.getDisplayName()+" with the power of death's scythe!");
+					output.outputToTarget((Player)fightable, player.getDisplayName() + " reaps you with the power of death's scythe!");
+					output.outputToRoomExceptTarget(player,(Player)fightable,  player.getDisplayName() + " reaps "+fightable.getDisplayName()+" with the power of death's scythe!");
 				}else{
-					Output.outputToRoom(player,player.getDisplayName()+" reaps "+fightable.getDisplayName()+ " with the power of death's scythe!");
+					output.outputToRoom(player,player.getDisplayName()+" reaps "+fightable.getDisplayName()+ " with the power of death's scythe!");
 				}
-				
-				Combat combat=new Combat();
 				combat.doKillFightable(player, fightable);
-				Output.outputToTarget(player,"Since you are not death, you seem to have exhausted the killing power of this scythe. It reverts to a normal extremely deadly scythe.");
+				output.outputToTarget(player,"Since you are not death, you seem to have exhausted the killing power of this scythe. It reverts to a normal extremely deadly scythe.");
 				Item scythe = itemReader.readItem("DeathScythe");
 				scythe.setExamine("The power has drained from this scythe, but it is still quite sharp and lethal.");
 				scythe.setEffects(null);	
@@ -68,7 +73,7 @@ public class Reap extends Effect{
 		
 			
 		
-		Output.outputToTarget(player,"You can't reap "+commands[1].toLowerCase()+"!");
+		output.outputToTarget(player,"You can't reap "+commands[1].toLowerCase()+"!");
 		return player;
 	}
 		

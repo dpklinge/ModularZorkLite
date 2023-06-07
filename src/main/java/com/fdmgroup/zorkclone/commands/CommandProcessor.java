@@ -15,7 +15,6 @@ import com.fdmgroup.zorkclone.combat.CombatChecker;
 import com.fdmgroup.zorkclone.combat.Fightable;
 import com.fdmgroup.zorkclone.effects.Effect;
 import com.fdmgroup.zorkclone.effects.Effectables;
-import com.fdmgroup.zorkclone.effects.effectio.EffectReader;
 import com.fdmgroup.zorkclone.items.Item;
 import com.fdmgroup.zorkclone.items.ItemType;
 import com.fdmgroup.zorkclone.items.io.ItemReader;
@@ -25,23 +24,37 @@ import com.fdmgroup.zorkclone.player.io.PlayerReader;
 import com.fdmgroup.zorkclone.rooms.Direction;
 import com.fdmgroup.zorkclone.rooms.Room;
 import com.fdmgroup.zorkclone.rooms.io.RoomReader;
-import com.fdmgroup.zorkclone.webcontrollers.websockets.OutputEndpoint;
 import com.fdmgroup.zorkclone.weboutput.Output;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CommandProcessor {
-	private Player player;
-	private InventoryManager inventory = new InventoryManager();
-	private Random random = new Random();
+	@Autowired
+	private ListFetchUtil listFetchUtil;
 
-	public CommandProcessor(Player player) {
-		this.player = player;
-	}
+	@Autowired
+	private DirectionalCommands directionalCommands;
+	
+	@Autowired
+	private List<Effect> effects;
+	@Autowired
+	private Combat combat;
 
-	public Player processCommand(String[] commands) {
+	@Autowired
+	private CombatChecker combatChecker;
+	@Autowired
+	private InventoryManager inventoryManager;
+	@Autowired
+	private Output output;
+	
+	private Random random =  new Random();
+
+	public Player processCommand(String[] commands, Player player) {
 		player = refreshPlayer(player);
 		player.setCurrentRoom(getRoom(player.getCurrentRoom().getName()));
 		
-		Effect effect = checkForEffects(commands);
+		Effect effect = checkForEffects(commands, player);
 		if (effect != null) {
 			player = effect.doEffect(commands, this);
 			updatePlayer(player);
@@ -49,7 +62,6 @@ public class CommandProcessor {
 		}
 
 		String firstCommand = commands[0].toUpperCase();
-		DirectionalCommands directionalCommands = new DirectionalCommands();
 		if (directionalCommands.isDirectional(firstCommand)) {
 			directionalCommands.doDirection(player, commands);
 		} else if (firstCommand.equalsIgnoreCase("GO")) {
@@ -57,56 +69,56 @@ public class CommandProcessor {
 				commands[0] = commands[1];
 				directionalCommands.doDirection(player, commands);
 			} else {
-				Output.outputToTarget(player, "That isn't a direction you can go.");
+				output.outputToTarget(player, "That isn't a direction you can go.");
 			}
 		} else if (firstCommand.equalsIgnoreCase("LOOK") || firstCommand.equalsIgnoreCase("L")) {
-			doLook(commands);
+			doLook(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("QUIT") || firstCommand.equalsIgnoreCase("Q")) {
-			doQuit();
+			doQuit(player);
 			if (Main.isWeb) {
 				return null;
 			}
 		} else if (firstCommand.equalsIgnoreCase("HELP")) {
-			doHelp();
+			doHelp(player);
 		} else if (firstCommand.equalsIgnoreCase("GET") || firstCommand.equalsIgnoreCase("GRAB") || firstCommand.equalsIgnoreCase("G")
 				|| firstCommand.equalsIgnoreCase("TAKE")) {
-			doGet(commands);
+			doGet(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("I") || firstCommand.equalsIgnoreCase("INVENTORY")) {
-			doDisplayInventory();
+			doDisplayInventory(player);
 		} else if (firstCommand.equalsIgnoreCase("DR") || firstCommand.equalsIgnoreCase("DROP")) {
-			doDrop(commands);
+			doDrop(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("X") || firstCommand.equalsIgnoreCase("EX") || firstCommand.equalsIgnoreCase("EXAMINE")) {
-			doExamine(commands);
+			doExamine(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("AT") || firstCommand.equalsIgnoreCase("ATTACK") || firstCommand.equalsIgnoreCase("HIT")
 				|| firstCommand.equalsIgnoreCase("ASSAULT") || firstCommand.equalsIgnoreCase("K") || firstCommand.equalsIgnoreCase("KILL")
 				|| firstCommand.equalsIgnoreCase("STAB") || firstCommand.equalsIgnoreCase("PUNCH")) {
-			doAttackAttempt(commands);
+			doAttackAttempt(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("SLEEP")) {
-			doSleep();
+			doSleep(player);
 		} else if (firstCommand.equalsIgnoreCase("WAKE")) {
-			doWake();
+			doWake(player);
 		} else if (firstCommand.equalsIgnoreCase("WIELD")) {
-			inventory.doWield(player, commands);
+			inventoryManager.doWield(player, commands);
 		} else if (firstCommand.equalsIgnoreCase("EQUIP") || firstCommand.equalsIgnoreCase("WEAR")) {
-			inventory.doEquip(player, commands);
+			inventoryManager.doEquip(player, commands);
 		} else if (firstCommand.equalsIgnoreCase("UNWIELD")) {
-			inventory.doUnwield(player, commands);
+			inventoryManager.doUnwield(player, commands);
 		} else if (firstCommand.equalsIgnoreCase("UNEQUIP") || firstCommand.equalsIgnoreCase("REMOVE")) {
-			inventory.doUnequip(player, commands);
+			inventoryManager.doUnequip(player, commands);
 		} else if (firstCommand.equalsIgnoreCase("CLEAR")) {
-			doClear();
+			doClear(player);
 		} else if (firstCommand.equalsIgnoreCase("THROW")) {
-			doThrow(commands);
+			doThrow(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("SAY") || firstCommand.equalsIgnoreCase("TELL")) {
-			doSpeak(commands);
+			doSpeak(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("YELL") || (firstCommand.equalsIgnoreCase("SHOUT"))) {
-			doYell(commands);
+			doYell(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("GIVE")) {
-			doGive(commands);
+			doGive(commands, player);
 		} else if (firstCommand.equalsIgnoreCase("ALIAS")) {
-			doAlias();
+			doAlias(player);
 		} else {
-			Output.outputToTarget(player, "I don't know how to do that...");
+			output.outputToTarget(player, "I don't know how to do that...");
 		}
 		updatePlayer(player);
 		return player;
@@ -120,77 +132,76 @@ public class CommandProcessor {
 		
 	}
 
-	private void doAlias() {
-		Output.outputToTarget(player, "Your aliases: " + player.getAliases());
+	private void doAlias(Player player) {
+		output.outputToTarget(player, "Your aliases: " + player.getAliases());
 
 	}
 
-	private void doGive(String[] commands) {
+	private void doGive(String[] commands, Player player) {
 		if (commands.length < 2) {
-			Output.outputToTarget(player, "Give WHAT?");
+			output.outputToTarget(player, "Give WHAT?");
 			return;
 		}
-		GetLists getLists = new GetLists();
-		List<Player> playerList = getLists.getListPlayers(player);
+		List<Player> playerList = listFetchUtil.getListPlayers(player);
 		for (Player targetPlayer : playerList) {
 			if (commands.length < 3) {
-				Output.outputToTarget(player, "Give " + commands[1] + " WHAT?");
+				output.outputToTarget(player, "Give " + commands[1] + " WHAT?");
 			}
 			if (targetPlayer.getAliases().stream().anyMatch(commands[1]::equalsIgnoreCase)) {
-				Item item = getItemForRemoval(commands[2]);
+				Item item = getItemForRemoval(commands[2], player);
 				if (item == null) {
-					Output.outputToTarget(player, "You don't seem to have that item to give!");
+					output.outputToTarget(player, "You don't seem to have that item to give!");
 					return;
 				} else {
 					player.getHeldItem().remove(item);
 					targetPlayer.getHeldItem().add(item);
 					updatePlayer(targetPlayer);
-					Output.outputToTarget(player, "You give " + targetPlayer.getDisplayName() + " "
-							+ Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".");
-					Output.outputToTarget(targetPlayer,
+					output.outputToTarget(player, "You give " + targetPlayer.getDisplayName() + " "
+							+ output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".");
+					output.outputToTarget(targetPlayer,
 							player.getDisplayName() + " gives you " + item.getDisplayName() + ".");
-					Output.outputToRoomExceptTarget(player, targetPlayer,
+					output.outputToRoomExceptTarget(player, targetPlayer,
 							player.getDisplayName() + " gives " + targetPlayer.getDisplayName() + " "
-									+ Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".");
+									+ output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".");
 					return;
 				}
 			}
 		}
-		Actor actor = getActorIfPresent(commands[1]);
+		Actor actor = getActorIfPresent(commands[1], player);
 		if (actor != null) {
 			if(actor.getIsDead()){
-				Output.outputToTarget(player, "Leave the dead be! They've suffered enough.");
+				output.outputToTarget(player, "Leave the dead be! They've suffered enough.");
 				return;
 			}
-			Item item = getItemForRemoval(commands[2]);
+			Item item = getItemForRemoval(commands[2], player);
 			if (item == null) {
-				Output.outputToTarget(player, "You don't seem to have that item to give!");
+				output.outputToTarget(player, "You don't seem to have that item to give!");
 				return;
 			} else {
 				player.getHeldItem().remove(item);
 				actor.getItemsHeld().add(item);
 				ActorReader reader = Main.getActorReader(Main.savedGamePath);
 				reader.writeActor(actor);
-				Output.outputToTarget(player, "You give " + actor.getDisplayName() + " "
-						+ Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".");
-				Output.outputToRoom(player,
+				output.outputToTarget(player, "You give " + actor.getDisplayName() + " "
+						+ output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".");
+				output.outputToRoom(player,
 						player.getDisplayName() + " generously donates their " + item.getDisplayName() + " to "
-								+ Output.needsAThe(actor.getDisplayName()) + actor.getDisplayName() + ".");
+								+ output.needsAThe(actor.getDisplayName()) + actor.getDisplayName() + ".");
 				return;
 			}
 		}
-		if (commands.length > 3 && commands[2].equalsIgnoreCase("to") && getItemForRemoval(commands[1]) != null) {
+		if (commands.length > 3 && commands[2].equalsIgnoreCase("to") && getItemForRemoval(commands[1], player) != null) {
 			String temp = commands[1];
 			commands[1] = commands[3];
 			commands[2] = temp;
-			doGive(commands);
+			doGive(commands, player);
 			return;
 		}
-		Output.outputToTarget(player, "I'm sorry, I don't understand how you phrased that. I'm a bit daft.");
+		output.outputToTarget(player, "I'm sorry, I don't understand how you phrased that. I'm a bit daft.");
 
 	}
 
-	private void doYell(String[] commands) {
+	private void doYell(String[] commands, Player player) {
 		if (commands.length > 1) {
 			StringBuilder chatOutput = new StringBuilder();
 			for (int i = 1; i < commands.length; i++) {
@@ -198,14 +209,14 @@ public class CommandProcessor {
 			}
 			String otherOutput = "<br/>" + player.getDisplayName() + " yells \""
 					+ chatOutput.substring(0, chatOutput.length() - 1) + "\"";
-			Output.outputToAll(player, otherOutput);
+			output.outputToAll(player, otherOutput);
 		}
 
 	}
 
-	public void doSpeak(String[] commands) {
+	public void doSpeak(String[] commands, Player player) {
 		if (commands.length < 2) {
-			Output.outputToTarget(player, "Say WHAT?");
+			output.outputToTarget(player, "Say WHAT?");
 			return;
 		}
 		if (commands[0].equalsIgnoreCase("say")) {
@@ -215,40 +226,39 @@ public class CommandProcessor {
 			}
 			String selfOutput = "You say \"" + chatOutput.toString().trim() + "\"";
 			String otherOutput = player.getDisplayName() + " says \"" + chatOutput.toString().trim() + "\"";
-			Output.outputToRoom(player, otherOutput);
-			Output.outputToTarget(player, selfOutput);
+			output.outputToRoom(player, otherOutput);
+			output.outputToTarget(player, selfOutput);
 		} else if (commands[0].equalsIgnoreCase("tell")) {
 			Player targetPlayer = getPlayer(commands[1]);
 			if (targetPlayer == null) {
-				Output.outputToTarget(player, commands[1] + " does not appear to be someone you can tell things to.");
+				output.outputToTarget(player, commands[1] + " does not appear to be someone you can tell things to.");
 			} else {
 				StringBuilder chatOutput = new StringBuilder();
-				for (int i = 1; i < commands.length; i++) {
+				for (int i = 2; i < commands.length; i++) {
 					chatOutput.append(chatOutput + commands[i] + " ");
 				}
-				Output.outputToTarget(targetPlayer,
+				output.outputToTarget(targetPlayer,
 						player.getDisplayName() + " tells you \"" + chatOutput.toString().trim() + "\"");
-				Output.outputToTarget(player,
+				output.outputToTarget(player,
 						"You tell " + targetPlayer.getDisplayName() + " \"" + chatOutput.toString().trim() + "\"");
 			}
 		}
 
 	}
 
-	public void doQuit() {
+	public void doQuit(Player player) {
 
 		if (!Main.isWeb) {
-			Output.outputToTarget(player, "Thanks for playing!");
-			Output.outputToTarget(player, "Quitting...");
+			output.outputToTarget(player, "Thanks for playing!");
+			output.outputToTarget(player, "Quitting...");
 			PlayerReader reader = Main.getPlayerReader();
 			reader.writePlayer(player);
 			System.exit(0);
 		} else {
-			Output.outputToAll(player, "<br/>" + player.getDisplayName() + " has left the game.");
+			output.outputToAll(player, "<br/>" + player.getDisplayName() + " has left the game.");
 			JsonPlayerReader playerReader = new JsonPlayerReader();
 			playerReader.writePlayer(player);
-			CombatChecker.leaveRoom(player, null, null);
-			OutputEndpoint.endSession(OutputEndpoint.users.get(player.getUser()), player);
+			combatChecker.leaveRoom(player, null, null);
 		}
 
 	}
@@ -258,73 +268,71 @@ public class CommandProcessor {
 		return reader.getPlayer(playerRefresh.getUser().getUsername(), playerRefresh.getName());
 	}
 
-	public void doThrow(String[] commands) {
+	public void doThrow(String[] commands, Player player) {
 		if (commands.length < 2) {
-			Output.outputToTarget(player, "Throw WHAT?");
+			output.outputToTarget(player, "Throw WHAT?");
 			return;
 		}
 		if (commands.length < 3) {
-			Item item = getItemForRemoval(commands[1]);
+			Item item = getItemForRemoval(commands[1], player);
 			if (item == null) {
-				Output.outputToTarget(player, "You don't seem to have that item to throw!");
+				output.outputToTarget(player, "You don't seem to have that item to throw!");
 			} else {
-				randomThrow(item);
+				randomThrow(item, player);
 			}
 
 		} else if (commands.length < 4) {
 			if (commands[2].equalsIgnoreCase("AT")) {
-				Output.outputToTarget(player, "Throw at WHAT?");
+				output.outputToTarget(player, "Throw at WHAT?");
 			} else {
-				DirectionalCommands directionalCommands = new DirectionalCommands();
 				if (directionalCommands.isDirectional(commands[2])) {
-					Item item = getItemForRemoval(commands[1]);
+					Item item = getItemForRemoval(commands[1], player);
 					if (player.getCurrentRoom().getDirections().contains(Direction.valueOf(commands[2]))) {
 
 						if (item == null) {
-							Output.outputToTarget(player, "You don't seem to have that item to throw!");
+							output.outputToTarget(player, "You don't seem to have that item to throw!");
 						} else {
-							directionalThrow(Direction.valueOf(commands[2]), item);
+							directionalThrow(Direction.valueOf(commands[2]), item, player);
 						}
 					} else {
-						Output.outputToTarget(player, "You can't throw " + item.getDisplayName() + " that direction!");
+						output.outputToTarget(player, "You can't throw " + item.getDisplayName() + " that direction!");
 					}
 				} else {
-					Output.outputToTarget(player, "I'm sorry, I don't understand how you're asking me to throw...");
+					output.outputToTarget(player, "I'm sorry, I don't understand how you're asking me to throw...");
 				}
 			}
 
 		} else {
 			if (commands[2].equalsIgnoreCase("AT")) {
-				Actor actor = getActorIfPresent(commands[3]);
-				Player playerTarget = getPlayerIfPresent(commands[3]);
+				Actor actor = getActorIfPresent(commands[3], player);
+				Player playerTarget = getPlayerIfPresent(commands[3], player);
 				if (actor != null) {
-					Item item = getItemForRemoval(commands[1]);
+					Item item = getItemForRemoval(commands[1], player);
 					if (item != null) {
-						throwAtTarget(actor, item);
+						throwAtTarget(actor, item, player);
 					} else {
-						Output.outputToTarget(player, "You don't seem to have that item!");
+						output.outputToTarget(player, "You don't seem to have that item!");
 					}
 				} else if(playerTarget!=null) {
-					Item item = getItemForRemoval(commands[1]);
+					Item item = getItemForRemoval(commands[1], player);
 					if (item != null) {
-						throwAtTarget(player, item);
+						throwAtTarget(playerTarget, item, player);
 					} else {
-						Output.outputToTarget(player, "You don't seem to have that item!");
+						output.outputToTarget(player, "You don't seem to have that item!");
 					}
 				}else{
-					Output.outputToTarget(player, "That is not a valid target!");
+					output.outputToTarget(player, "That is not a valid target!");
 				}
 
 			} else {
-				Output.outputToTarget(player, "I'm sorry I don't understand how you want me to throw...");
+				output.outputToTarget(player, "I'm sorry I don't understand how you want me to throw...");
 			}
 		}
 
 	}
 
-	private Player getPlayerIfPresent(String string) {
-		GetLists getList = new GetLists();
-		for(Player otherPlayer : getList.getListPlayers(player)){
+	private Player getPlayerIfPresent(String string, Player player) {
+		for(Player otherPlayer : listFetchUtil.getListPlayers(player)){
 			if(otherPlayer.getAliases().stream().anyMatch(string::equalsIgnoreCase)){
 				return otherPlayer;
 			}
@@ -332,20 +340,20 @@ public class CommandProcessor {
 		return null;
 	}
 
-	public void throwAtTarget(Fightable fightable, Item item) {
+	public void throwAtTarget(Fightable fightable, Item item, Player player) {
 		Room room = player.getCurrentRoom();
 		room.getItemsPresent().add(item.getName());
 		player.getHeldItem().remove(item);
 		if (item.getType() == ItemType.WEAPON) {
 			Item weapon = item;
 			if (fightable.getIsDead()) {
-				String baseMessage = "You hurl " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName()
-						+ " at the corpse of " + Output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName()
+				String baseMessage = "You hurl " + output.needsAThe(item.getDisplayName()) + item.getDisplayName()
+						+ " at the corpse of " + output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName()
 						+ ". Weirdo.";
-				Output.outputToTarget(player, Output.capitalize(baseMessage));
-				Output.outputToRoom(player,
-						player.getDisplayName() + " throws " + Output.needsAThe(item.getDisplayName())
-								+ item.getDisplayName() + "at the corpse of " + Output.needsAThe(fightable.getDisplayName())
+				output.outputToTarget(player, output.capitalize(baseMessage));
+				output.outputToRoom(player,
+						player.getDisplayName() + " throws " + output.needsAThe(item.getDisplayName())
+								+ item.getDisplayName() + "at the corpse of " + output.needsAThe(fightable.getDisplayName())
 								+ fightable.getDisplayName() + ".");
 
 			} else {
@@ -354,16 +362,16 @@ public class CommandProcessor {
 					if (actor.getBehaviours().contains(Behaviour.NEUTRAL)) {
 						actor.getBehaviours().add(Behaviour.AGGRESSIVE);
 						actor.getBehaviours().remove(Behaviour.NEUTRAL);
-						CombatChecker.addAggressor(actor, player);
+						combatChecker.addAggressor(actor, player);
 					}
 				}
 
-				Output.outputToTarget(player,
-						"You hurl " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + " at "
-								+ Output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName() + ".");
-				Output.outputToRoom(player,
-						player.getDisplayName() + " hurls " + Output.needsAThe(item.getDisplayName())
-								+ item.getDisplayName() + " at " + Output.needsAThe(fightable.getDisplayName())
+				output.outputToTarget(player,
+						"You hurl " + output.needsAThe(item.getDisplayName()) + item.getDisplayName() + " at "
+								+ output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName() + ".");
+				output.outputToRoom(player,
+						player.getDisplayName() + " hurls " + output.needsAThe(item.getDisplayName())
+								+ item.getDisplayName() + " at " + output.needsAThe(fightable.getDisplayName())
 								+ fightable.getDisplayName() + ".");
 				Double multiplier = Double.valueOf(random.nextInt(300));
 				Double attack = Double.valueOf(weapon.getDamage());
@@ -371,17 +379,16 @@ public class CommandProcessor {
 				damage = Precision.round(damage, 0);
 				damage = damage - fightable.getDamageReduction();
 				if (damage <= 0) {
-					String output = "Your " + item.getDisplayName() + " glances off "
-							+ Output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName() + ", doing no damage.";
-					Output.outputToTarget(player, output);
+					String outputMessage = "Your " + item.getDisplayName() + " glances off "
+							+ output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName() + ", doing no damage.";
+					output.outputToTarget(player, outputMessage);
 				} else {
-					Output.outputToTarget(player,
-							Output.capitalize(Output.needsAThe(item.getDisplayName()) + item.getDisplayName()
-									+ " strikes " + Output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName()
+					output.outputToTarget(player,
+							output.capitalize(output.needsAThe(item.getDisplayName()) + item.getDisplayName()
+									+ " strikes " + output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName()
 									+ ", doing some damage."));
 				}
 				if (damage >= fightable.getHealth()) {
-					Combat combat = new Combat();
 					combat.doKillFightable(player, fightable);
 
 				} else if (damage > 0) {
@@ -391,19 +398,19 @@ public class CommandProcessor {
 
 			}
 		} else {
-			Output.outputToTarget(player,
-					"You throw the " + item.getDisplayName() + " at " + Output.needsAThe(fightable.getDisplayName())
+			output.outputToTarget(player,
+					"You throw the " + item.getDisplayName() + " at " + output.needsAThe(fightable.getDisplayName())
 							+ fightable.getDisplayName() + ". It is an unwieldy projectile and "
-							+ Output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName()
+							+ output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName()
 							+ " just shrugs it off.");
-			Output.outputToRoom(player, player.getDisplayName() + " awkwardly throws the " + item.getDisplayName()
-					+ " at " + Output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName() + ".");
+			output.outputToRoom(player, player.getDisplayName() + " awkwardly throws the " + item.getDisplayName()
+					+ " at " + output.needsAThe(fightable.getDisplayName()) + fightable.getDisplayName() + ".");
 		}
 		updateRoom(room);
 		updatePlayer(player);
 	}
 
-	public Actor getActorIfPresent(String actorName) {
+	public Actor getActorIfPresent(String actorName, Player player) {
 		for (String actor : player.getCurrentRoom().getActorsPresent()) {
 			Actor thisActor = getActor(actor);
 			if (thisActor.getAliases().stream().anyMatch(actorName::equalsIgnoreCase)) {
@@ -413,31 +420,30 @@ public class CommandProcessor {
 		return null;
 	}
 
-	public Item getItemForRemoval(String itemName) {
-		InventoryManager inventory = new InventoryManager();
-		return inventory.getItemForRemoval(player, itemName);
+	public Item getItemForRemoval(String itemName, Player player) {
+		return inventoryManager.getItemForRemoval(player, itemName);
 	}
 
-	public void randomThrow(Item item) {
+	public void randomThrow(Item item, Player player) {
 		List<Direction> directions = player.getCurrentRoom().getDirections();
 		int index = random.nextInt(directions.size());
 		Direction direction = directions.get(index);
-		directionalThrow(direction, item);
+		directionalThrow(direction, item, player);
 	}
 
-	public void directionalThrow(Direction direction, Item item) {
+	public void directionalThrow(Direction direction, Item item, Player player) {
 		Room room = getRoom(player.getCurrentRoom().getMapping().get(direction));
 		room.getItemsPresent().add(item.getName());
 		player.getHeldItem().remove(item);
 		updateRoom(room);
 		updatePlayer(player);
-		Output.outputToRoom(player, player.getDisplayName() + " throws " + Output.needsAThe(item.getDisplayName())
+		output.outputToRoom(player, player.getDisplayName() + " throws " + output.needsAThe(item.getDisplayName())
 				+ item.getDisplayName() + " " + Direction.getEnumString(direction));
-		Output.outputToTarget(player, "You throw " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName()
+		output.outputToTarget(player, "You throw " + output.needsAThe(item.getDisplayName()) + item.getDisplayName()
 				+ " " + Direction.getEnumString(direction));
 		System.out.println("Finished directionalThrow outputToTarget");
-		Output.outputToTargetRoom(player, room,
-				Output.capitalize(Output.needsAThe(item.getDisplayName()) + item.getDisplayName())
+		output.outputToTargetRoom(player, room,
+				output.capitalize(output.needsAThe(item.getDisplayName()) + item.getDisplayName())
 						+ " is hurled into the room from " + player.getCurrentRoom().getDisplayName() + ".");
 		System.out.println("Done with directionalThrow");
 	}
@@ -459,14 +465,13 @@ public class CommandProcessor {
 		return roomReader.readRoom(string);
 	}
 
-	public Effect checkForEffects(String[] commands) {
-		GetLists getLists = new GetLists();
-		List<Effectables> effectables = getLists.listAllEffectablesPresent(player);
+	public Effect checkForEffects(String[] commands, Player player) {
+		List<Effectables> effectables = listFetchUtil.listAllEffectablesPresent(player);
 		for (Effectables effectable : effectables) {
 			if (effectable.getEffects() != null) {
 				for (String effect : effectable.getEffects()) {
-					EffectReader reader = Main.getEffectReader();
-					Effect thisEffect = reader.readEffect(effect);
+
+					Effect thisEffect = effects.stream().filter(it -> it.getEffectName().equalsIgnoreCase(effect)).findFirst().orElseThrow(() -> {return new RuntimeException("Unlisted effect "+ effect+" attempted!");});
 					if (thisEffect != null
 							&& thisEffect.getCommandTrigger().stream().anyMatch(commands[0]::equalsIgnoreCase)) {
 						thisEffect.setRoom(player.getCurrentRoom());
@@ -491,9 +496,9 @@ public class CommandProcessor {
 		return actorReader.readActor(actor);
 	}
 
-	public void doClear() {
+	public void doClear(Player player) {
 		if (Main.isWeb) {
-			Output.outputToTarget(player,
+			output.outputToTarget(player,
 					"<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>");
 		} else {
 			System.out.println("/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n/n");
@@ -501,52 +506,50 @@ public class CommandProcessor {
 
 	}
 
-	public void doWake() {
-		Output.outputToTarget(player, "You're already awake silly!");
+	public void doWake(Player player) {
+		output.outputToTarget(player, "You're already awake silly!");
 		// TODO
 
 	}
 
-	public void doSleep() {
-		Output.outputToTarget(player, "NO I DON'T WANNA");
+	public void doSleep(Player player) {
+		output.outputToTarget(player, "NO I DON'T WANNA");
 		// TODO
 
 	}
 
-	public void doAttackAttempt(String[] commands) {
-		Combat combat = new Combat();
+	public void doAttackAttempt(String[] commands, Player player) {
 		combat.doAttackAttempt(player, commands);
 	}
 
-	public void doExamine(String[] commands) {
+	public void doExamine(String[] commands, Player player) {
 		if (commands.length < 2) {
-			Output.outputToTarget(player, "Examine WHAT?");
+			output.outputToTarget(player, "Examine WHAT?");
 			return;
 		}
 		String target = "";
-		GetLists getLists = new GetLists();
-		List<Effectables> effectables = getLists.listAllEffectablesPresent(player);
-		List<Player> players = getLists.getListPlayers(player);
+		List<Effectables> effectables = listFetchUtil.listAllEffectablesPresent(player);
+		List<Player> players = listFetchUtil.getListPlayers(player);
 		if (commands.length > 1) {
 			target = commands[1];
 			if (target.equalsIgnoreCase("me") || player.getAliases().stream().anyMatch(target::equalsIgnoreCase)) {
-				Output.outputToTarget(player, player.examine().replace(player.getName() + " looks", "You are"));
-				Output.outputToRoom(player, player.getDisplayName() + " examines themself.");
+				output.outputToTarget(player, player.examine().replace(player.getName() + " looks", "You are"));
+				output.outputToRoom(player, player.getDisplayName() + " examines themself.");
 				return;
 			}
 			try {
 				for (Effectables effectable : effectables) {
 					if (effectable.getAliases().stream().anyMatch(target::equalsIgnoreCase)) {
-						Output.outputToTarget(player, effectable.examine());
-						Output.outputToRoom(player,
+						output.outputToTarget(player, effectable.examine());
+						output.outputToRoom(player,
 								player.getDisplayName() + " examines " + effectable.getDisplayName() + ".");
 						return;
 					}
 				}
 				for (Player otherPlayer : players) {
 					if (otherPlayer.getAliases().stream().anyMatch(target::equalsIgnoreCase)) {
-						Output.outputToTarget(player, otherPlayer.examine());
-						Output.outputToRoom(player,
+						output.outputToTarget(player, otherPlayer.examine());
+						output.outputToRoom(player,
 								player.getDisplayName() + " examines " + otherPlayer.getDisplayName() + ".");
 						return;
 					}
@@ -556,23 +559,23 @@ public class CommandProcessor {
 				for (String playerString : playersPresent) {
 					if (target.equalsIgnoreCase(playerString.toLowerCase())) {
 						Player thisPlayer = getPlayer(playerString);
-						Output.outputToTarget(player, thisPlayer.examine());
-						Output.outputToRoom(player,
+						output.outputToTarget(player, thisPlayer.examine());
+						output.outputToRoom(player,
 								player.getDisplayName() + " examines " + thisPlayer.getDisplayName() + ".");
 						return;
 					}
 
 				}
-				Output.outputToTarget(player,
+				output.outputToTarget(player,
 						"I'm sorry, I can't find this '" + target.toLowerCase() + "' you speak of.");
 			} catch (Exception e) {
-				Output.outputToTarget(player, "This is an error doing something");
+				output.outputToTarget(player, "This is an error doing something");
 				e.printStackTrace();
-				Output.outputToTarget(player,
+				output.outputToTarget(player,
 						"I'm sorry, I can't find this '" + target.toLowerCase() + "' you speak of.");
 			}
 		} else {
-			Output.outputToTarget(player, "Bro. Please. Examine WHAT?");
+			output.outputToTarget(player, "Bro. Please. Examine WHAT?");
 
 		}
 
@@ -583,33 +586,33 @@ public class CommandProcessor {
 		return playerReader.readPlayerByName(playerString);
 	}
 
-	public void doDrop(String[] commands) {
+	public void doDrop(String[] commands, Player player) {
 		if (commands.length < 2) {
-			Output.outputToTarget(player, "Drop WHAT?");
+			output.outputToTarget(player, "Drop WHAT?");
 			return;
 		}
-		String output = "";
+		String outputMessage = "";
 		String outputOther = "";
 		String target = commands[1];
 		if (target.equalsIgnoreCase("ALL")) {
 			List<Item> items = player.getHeldItem();
 			if (items.isEmpty()) {
-				Output.outputToTarget(player, "You don't have any loose items to drop!");
+				output.outputToTarget(player, "You don't have any loose items to drop!");
 			}
 			for (Item item : items) {
 				player.getCurrentRoom().getItemsPresent().add(item.getName());
 
 				if (item.getQuantity() < 2) {
-					output = "You drop " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".";
-					outputOther = player.getDisplayName() + " drops " + Output.needsAThe(item.getDisplayName())
+					outputMessage = "You drop " + output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".";
+					outputOther = player.getDisplayName() + " drops " + output.needsAThe(item.getDisplayName())
 							+ item.getDisplayName() + ".";
 				} else {
-					output = "You drop " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + "s.";
-					outputOther = player.getDisplayName() + " drops " + Output.needsAThe(item.getDisplayName())
+					outputMessage = "You drop " + output.needsAThe(item.getDisplayName()) + item.getDisplayName() + "s.";
+					outputOther = player.getDisplayName() + " drops " + output.needsAThe(item.getDisplayName())
 							+ item.getDisplayName() + "s.";
 				}
-				Output.outputToTarget(player, output);
-				Output.outputToRoom(player, outputOther);
+				output.outputToTarget(player, outputMessage);
+				output.outputToRoom(player, outputOther);
 				updateRoom(player.getCurrentRoom());
 			}
 			int size = items.size();
@@ -620,28 +623,28 @@ public class CommandProcessor {
 		}
 
 		try {
-			Item item = getItemForRemoval(target);
+			Item item = getItemForRemoval(target, player);
 			if (item == null) {
-				output = "You don't have " + target + " to drop!";
-				Output.outputToTarget(player, output);
+				outputMessage = "You don't have " + target + " to drop!";
+				output.outputToTarget(player, outputMessage);
 			} else {
 				if (item.getQuantity() < 2) {
-					output = "You drop " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".";
-					outputOther = player.getDisplayName() + " drops " + Output.needsAThe(item.getDisplayName())
+					outputMessage = "You drop " + output.needsAThe(item.getDisplayName()) + item.getDisplayName() + ".";
+					outputOther = player.getDisplayName() + " drops " + output.needsAThe(item.getDisplayName())
 							+ item.getDisplayName() + ".";
 				} else {
-					output = "You drop " + Output.needsAThe(item.getDisplayName()) + item.getDisplayName() + "s.";
-					outputOther = player.getDisplayName() + " drops " + Output.needsAThe(item.getDisplayName())
+					outputMessage = "You drop " + output.needsAThe(item.getDisplayName()) + item.getDisplayName() + "s.";
+					outputOther = player.getDisplayName() + " drops " + output.needsAThe(item.getDisplayName())
 							+ item.getDisplayName() + "s.";
 				}
-				Output.outputToTarget(player, output);
-				Output.outputToRoom(player, outputOther);
+				output.outputToTarget(player, outputMessage);
+				output.outputToRoom(player, outputOther);
 				player.getHeldItem().remove(item);
 				player.getCurrentRoom().getItemsPresent().add(item.getName());
 				updateRoom(player.getCurrentRoom());
 				return;
 			}
-			Output.outputToTarget(player, "I'm sorry, you don't seem to have any " + target.toLowerCase() + "...");
+			output.outputToTarget(player, "I'm sorry, you don't seem to have any " + target.toLowerCase() + "...");
 		} catch (Exception e) {
 			System.out.println("Some error with dropping");
 			System.out.println(e);
@@ -649,15 +652,15 @@ public class CommandProcessor {
 
 	}
 
-	public void doDisplayInventory() {
-		Output.outputToRoom(player, player.getDisplayName() + " takes stock of their inventory.");
-		Output.outputToTarget(player, player.displayItems());
+	public void doDisplayInventory(Player player) {
+		output.outputToRoom(player, player.getDisplayName() + " takes stock of their inventory.");
+		output.outputToTarget(player, player.displayItems());
 
 	}
 
-	public void doGet(String[] commands) {
+	public void doGet(String[] commands, Player player) {
 		if (commands.length < 2) {
-			Output.outputToTarget(player, "Get WHAT?");
+			output.outputToTarget(player, "Get WHAT?");
 			return;
 		}
 		String target = commands[1];
@@ -666,26 +669,26 @@ public class CommandProcessor {
 			List<String> items = player.getCurrentRoom().getItemsPresent();
 
 			if (items == null || items.isEmpty()) {
-				Output.outputToTarget(player, "I'm sorry, I dont see any " + target.toLowerCase() + " here...");
+				output.outputToTarget(player, "I'm sorry, I dont see any " + target.toLowerCase() + " here...");
 			} else {
 				for (String item : items) {
 					Item thisItem = getItem(item);
 					if (thisItem.getAliases().stream().anyMatch(target::equalsIgnoreCase)) {
 						if (!thisItem.getIsHoldable()) {
-							Output.outputToTarget(player, "I'm afraid you can't pick that up!");
+							output.outputToTarget(player, "I'm afraid you can't pick that up!");
 							return;
 						} else {
-							String needsAThe = Output.needsAThe(thisItem.getDisplayName());
+							String needsAThe = output.needsAThe(thisItem.getDisplayName());
 							if (thisItem.getQuantity() < 2) {
 
-								Output.outputToTarget(player,
+								output.outputToTarget(player,
 										"You pick up " + needsAThe + thisItem.getDisplayName() + ".");
-								Output.outputToRoom(player, player.getDisplayName() + " picks up " + needsAThe
+								output.outputToRoom(player, player.getDisplayName() + " picks up " + needsAThe
 										+ thisItem.getDisplayName() + ".");
 							} else {
-								Output.outputToTarget(player,
+								output.outputToTarget(player,
 										"You pick up " + needsAThe + thisItem.getDisplayName() + "s.");
-								Output.outputToRoom(player, player.getDisplayName() + " picks up " + needsAThe
+								output.outputToRoom(player, player.getDisplayName() + " picks up " + needsAThe
 										+ thisItem.getDisplayName() + "s.");
 							}
 							player.getHeldItem().add(thisItem);
@@ -699,7 +702,7 @@ public class CommandProcessor {
 					}
 
 				}
-				Output.outputToTarget(player,
+				output.outputToTarget(player,
 						"I'm sorry, I dont see any " + target.toLowerCase() + " that you can get here...");
 			}
 		} catch (Exception e) {
@@ -708,46 +711,46 @@ public class CommandProcessor {
 
 	}
 
-	public void doHelp() {
-		Output.outputToTarget(player, "Try one of these commands: ");
-		Output.outputToTarget(player, "l, look: redisplays room");
-		Output.outputToTarget(player,
+	public void doHelp(Player player) {
+		output.outputToTarget(player, "Try one of these commands: ");
+		output.outputToTarget(player, "l, look: redisplays room");
+		output.outputToTarget(player,
 				"x, ex, examine, look at:  										 examines specified thing");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"n, north, go north (etc, same format for any direction):  		 attempt to travel in specified direction");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"g, get, grab, take:   											 attempts to take specified thing");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"dr, drop:        			 										 drops held item; 'drop all' to drop all");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"i, inventory:  													 displays held items");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"equip, wield, wear: 												 equips specified item/weapon/armor, respectively");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"unequip, unwield, remove:											 unequips specified item/weapon/armor, respectively");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"give (item) to (target), give (target) (item): 			 		 attempts to give item to target");
-		Output.outputToTarget(player, "throw (item), throw (item) (direction), throws (item) at (target): throws item");
-		Output.outputToTarget(player,
+		output.outputToTarget(player, "throw (item), throw (item) (direction), throws (item) at (target): throws item");
+		output.outputToTarget(player,
 				"k, kill, stab, at, attack, punch, hit: 							 attempts to attack target");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"say: 																 says something to room");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"tell (target): 													 says something to target, independent of distance");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"yell, shout: 														 says something to everyone logged in");
-		Output.outputToTarget(player,
+		output.outputToTarget(player,
 				"Additionally, some actors or items may have special commands associated with them! Examine your environment carefully for clues.");
 
 	}
 
-	public void doLook(String[] commands) {
+	public void doLook(String[] commands, Player player) {
 		if (commands.length < 2) {
 			player.setCurrentRoom(getRoom(player.getCurrentRoom().getName()));
-			Output.outputToTarget(player, player.getCurrentRoom().displayRoom(player));
-			Output.outputToRoom(player, player.getDisplayName() + " looks around.");
+			output.outputToTarget(player, player.getCurrentRoom().displayRoom(player, output));
+			output.outputToRoom(player, player.getDisplayName() + " looks around.");
 		} else if (commands[1].equalsIgnoreCase("at")) {
-			doExamine(new String[] { commands[0], commands[2] });
+			doExamine(new String[] { commands[0], commands[2] }, player);
 		}
 
 	}

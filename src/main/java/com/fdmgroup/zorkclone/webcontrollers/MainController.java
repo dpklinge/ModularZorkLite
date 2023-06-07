@@ -3,10 +3,10 @@ package com.fdmgroup.zorkclone.webcontrollers;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 
-import javax.annotation.PostConstruct;
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpSession;
 
+
+import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +19,6 @@ import com.fdmgroup.zorkclone.ZorkController;
 @Controller
 @ComponentScan(basePackages={"com.fdmgroup"})
 public class MainController {
-	@Autowired
-	private ServletContext servletContext;
 	@Autowired
 	private ZorkController controller;
 
@@ -39,9 +37,6 @@ public class MainController {
 			String ip = InetAddress.getLocalHost().getHostAddress();
 			System.out.println("Local ip address:" + ip);
 			logger.trace("Local ip address:" + ip);
-
-			servletContext.setAttribute("ipAddress", ip);
-			logger.trace("Finishing IP");
 
 		} catch (UnknownHostException e) {
 			System.out.println("=======================================================");

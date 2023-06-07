@@ -2,7 +2,9 @@ package com.fdmgroup.zorkclone.effects;
 
 import com.fdmgroup.zorkclone.commands.CommandProcessor;
 import com.fdmgroup.zorkclone.player.Player;
+import org.springframework.stereotype.Component;
 
+@Component
 public class KnightTalkEffect extends Effect {
 	
 	public KnightTalkEffect() {
@@ -14,9 +16,7 @@ public class KnightTalkEffect extends Effect {
 	@Override
 	public Player doEffect(String [] commands, CommandProcessor processor) {
 		Player player = getPlayer();
-		processor.doSpeak(commands);
-		
-		
+		processor.doSpeak(commands, player);
 		return player;
 	}
 	

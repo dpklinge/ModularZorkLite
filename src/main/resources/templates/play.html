@@ -1,0 +1,80 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Insert title here</title>
+<link rel="stylesheet" th:href="@{/CSS/global.css}"/>
+<script type="text/javascript"
+	src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+<script type="text/javascript" src="/ZorkClone/webjars/jquery/jquery.min.js"></script>
+<script type="text/javascript" src="/ZorkClone/webjars/sockjs-client/sockjs.min.js"></script>
+<script type="text/javascript" src="/ZorkClone/webjars/stomp-websocket/stomp.min.js"></script>
+</head>
+<body  class="gameMode">
+	<div class="roomDisplay" id="mainDisplay">
+		<h1>WELCOME TO <a href="/ZorkClone/">THE GAME</a>, <h1 id="playername" th:text="${ session.player.name }"></h1></h1>
+		<p id="result" th:text="${ roomDisplay }"></p>
+	</div>
+
+	<div class="input">
+		<form action="javascript:sendMessage()" method="POST" autocomplete="off" class="override">
+			<input type="text" name="command" class="commandInput" id="inputText"
+				required autofocus />
+			<button type="submit" class="commandButton formButton" value="Submit">Enter</button>
+		</form>
+	</div>
+	<p id="ipAddress" class="ipDisplay" th:text="${ application.ipAddress }"></p>
+	<p id="username" class="hiddenText" th:text="${ session.player.user.username }"></p>
+	
+<script type="text/javascript">
+var stompClient = null;
+var echoText = "";
+var username = document.getElementById("username").textContent;
+var playername = document.getElementById("playername").textContent;
+connect();
+function connect() {
+    var socket = new SockJS('/ZorkClone/gs-guide-websocket');
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        console.log('Connected: ' + frame);
+		stompClient.subscribe('/user/'+ username+'/response', function (message) {
+            showMessage(JSON.parse(message.body).content);
+        });
+        stompClient.subscribe('/all', function (message) {
+            showMessage(JSON.parse(message.body).content + "from plain js");
+        });
+        var startLook = "look";
+        sendMessage(startLook);
+    });
+}
+
+function disconnect() {
+    if (stompClient !== null) {
+        stompClient.disconnect();
+    }
+    console.log("Disconnected");
+}
+
+function sendMessage(message) {
+	if(message == null){
+	   message= document.getElementById("inputText").value;
+	}
+	stompClient.send("/app/command", {}, JSON.stringify({'username': username, 'playername': playername, 'command': message}));
+	document.getElementById("result").innerHTML=echoText;
+	document.getElementById("inputText").value = "";
+	if(message.toUpperCase() === "QUIT"||message.toUpperCase() === "Q"){
+		disconnect()
+		window.location.href = "/ZorkClone/userHome/";
+	}
+}
+
+function showMessage(message) {
+    echoText += message;
+	document.getElementById("result").innerHTML=echoText;
+	var objDiv = document.getElementById("mainDisplay");
+	objDiv.scrollTop = objDiv.scrollHeight;
+}
+	</script>
+</body>
+</html>

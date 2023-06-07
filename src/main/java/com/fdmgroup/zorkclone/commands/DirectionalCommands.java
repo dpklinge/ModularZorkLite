@@ -7,8 +7,16 @@ import com.fdmgroup.zorkclone.rooms.Direction;
 import com.fdmgroup.zorkclone.rooms.Room;
 import com.fdmgroup.zorkclone.rooms.io.RoomReader;
 import com.fdmgroup.zorkclone.weboutput.Output;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
+@Service
 public class DirectionalCommands {
+
+	@Autowired
+	private CombatChecker combatChecker;
+	@Autowired
+	private Output output;
 	public boolean isDirectional(String command) {
 		command = command.toUpperCase();
 		if (command.equals("NORTH") || command.equals("EAST") || command.equals("SOUTH") || command.equals("WEST")
@@ -49,19 +57,19 @@ public class DirectionalCommands {
 		}
 
 		if (player.getCurrentRoom().getDirections().contains(Direction.valueOf(command))) {
-			if (CombatChecker.canLeaveRoom(player.getCurrentRoom(), Direction.valueOf(command))) {
+			if (combatChecker.canLeaveRoom(player.getCurrentRoom(), Direction.valueOf(command))) {
 				RoomReader reader = Main.getRoomReader(Main.baseGamePath);
 				Room newRoom =reader.readRoom((String) player.getCurrentRoom().getMapping().get(Direction.valueOf(command)));
-				CombatChecker.leaveRoom(player, newRoom, Direction.valueOf(command));
-				Output.outputToTarget(player,"You travel " + Direction.getEnumString(Direction.valueOf(command)) + ".");
-				CombatChecker.enterRoom(player, newRoom);
-				Output.outputToTarget(player,player.getCurrentRoom().displayRoom(player));
+				combatChecker.leaveRoom(player, newRoom, Direction.valueOf(command));
+				output.outputToTarget(player,"You travel " + Direction.getEnumString(Direction.valueOf(command)) + ".");
+				combatChecker.enterRoom(player, newRoom);
+				output.outputToTarget(player,player.getCurrentRoom().displayRoom(player, output));
 				
 				
 
 			}
 		} else {
-			Output.outputToTarget(player,"You can't go that direction!");
+			output.outputToTarget(player,"You can't go that direction!");
 		}
 
 	}
